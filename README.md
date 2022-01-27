@@ -10,7 +10,7 @@ Note: this step may no longer be necessary with the current version of torch.
 if (!require('devtools')) install.packages('devtools')
 
 # install CameraTrapDetectoR
-devtools::install_github("https://github.com/mikeyEcology/CameraTrapDetectoR.git")
+devtools::install_github("https://github.com/TabakM/CameraTrapDetectoR.git")
 ```
 If running the above command yields an error that looks like `Error: Failed to install 'CameraTrapDetectoR' from GitHub:
   System command 'Rcmd.exe' failed, exit status: 1, stdout + stderr:`, there is a permissions issue on your machine that prevents installation directly from github. [See the instructions below for installing from source](#install-from-source).
