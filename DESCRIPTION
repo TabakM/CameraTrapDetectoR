@@ -1,0 +1,12 @@
+Package: CameraTrapDetectoR
+Type: Package
+Title: CameraTrapDetectoR
+Version: 0.0.3
+Author: Michael A. Tabak
+Maintainer: Mikey Tabak <mtabak@west-ulc.ca>
+Description: This package will run object detection models on camera trap images. There is a general model that detects, counts, and classifies objects as birds, humans, (non-human) mammals, and vehicles, while also IDing empty images. There is another model that goes to the species level, and a third model that classifies to the family level. The `deploy_model` function is most relevent and will run each type of model on your images. The `runShiny` function will launch a Shiny Application to run the `deploy_model` function.  
+License: GPL-2
+Encoding: UTF-8
+LazyData: yes
+RoxygenNote: 7.1.2
+Imports: torchvision (>= 0.4.0), torch (>= 0.6.0), magick, shiny, shinyFiles, shinyBS, shinyjs, fs, rappdirs
