@@ -28,7 +28,7 @@ deploy_model(
 
 \item{model_type}{Options are c('general', 'species', 'family'). The `general`
 model predicts to the level of mammal, bird, humans, vehicles. The `species` 
-model recognizes 58 species. The `family` model recognizes 25 families.}
+model recognizes 77 species. The `family` model recognizes 33 families.}
 
 \item{recursive}{boolean. Do you have images in subfolders within your
 data_dir that you want to analyze, if so, set to TRUE. If you only want to 
@@ -97,7 +97,7 @@ This function deploys a model to detect and classify objects in camera
  you may wish to specify \code{sample50=TRUE} the first time you use this function,
  which will only deploy the model on 50 of your images. There are three options for
  \code{model_type}: 'general' recognizes mammals, birds, humans, and vehicles. 
- 'species' recognizes 58 species. 'family' recognizes 25 families. If you want
+ 'species' recognizes 77 species. 'family' recognizes 33 families. If you want
  to see all of the information for each bounding box (including coordinates, 
  labels, and confidence), specify \code{write_bbox_csv=TRUE} and it will be
  produced in your `output_dir`. Additionally,

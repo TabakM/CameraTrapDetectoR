@@ -16,7 +16,7 @@
 #'  you may wish to specify \code{sample50=TRUE} the first time you use this function,
 #'  which will only deploy the model on 50 of your images. There are three options for
 #'  \code{model_type}: 'general' recognizes mammals, birds, humans, and vehicles. 
-#'  'species' recognizes 58 species. 'family' recognizes 25 families. If you want
+#'  'species' recognizes 77 species. 'family' recognizes 33 families. If you want
 #'  to see all of the information for each bounding box (including coordinates, 
 #'  labels, and confidence), specify \code{write_bbox_csv=TRUE} and it will be
 #'  produced in your `output_dir`. Additionally,
@@ -30,7 +30,7 @@
 #'  analyze images within your data_dir and not within sub-folders, set to FALSE.
 #' @param model_type Options are c('general', 'species', 'family'). The `general`
 #'  model predicts to the level of mammal, bird, humans, vehicles. The `species` 
-#'  model recognizes 58 species. The `family` model recognizes 25 families.
+#'  model recognizes 77 species. The `family` model recognizes 33 families.
 #' @param file_extensions The types of extensions on your image files. Default 
 #'  is c(".jpg", ".JPG")
 #' @param make_plots boolean. Do you want to make plots of the images with
@@ -130,7 +130,7 @@ deploy_model <- function(
   }
   if(model_type == "species"){
     # run target2label.values() in python to get this list, but empty will be at the end
-    categories <- c('empty', 'American_Badger', 'American_Marten', 'American_Mink', 'American_Red_Squirrel', 'American_Robin', 'Bighorn_Sheep', 'Black-Tailed_Jackrabbit', 'Black-Tailed_Prairie_Dog', 'Cascade_Red_Fox', "Clark's_Nutcracker", 'Common_Grackle', 'Common_Raven', 'Mouse_Rat', 'Domestic_Dog', 'Dusky_Grouse', 'Fisher', 'Golden_Eagle', 'Gray_Jay', 'Grizzly_Bear', 'Horse', 'Moose', 'Mourning_Dove', 'Nine-Banded_Armadillo', 'North American Beaver', 'North_American_Porcupine', 'Prairie_Chicken', 'Pronghorn', 'Red_Fox', 'River_Otter', 'Ruffed_Grouse', 'Skunk', 'Snowshoe_Hare', "Steller's_Jay", 'Virginia_Opossum', 'Wolf', 'Wolverine', 'Woodchuck', 'Yellow-Bellied_Marmot', 'Bird', 'American_Black_Bear', 'Bobcat', 'Domestic_Cow', 'Cottontail_Rabbit', 'Coyote', 'Domestic_Donkey', 'Rocky_Mountain_Elk', 'Gray_Fox', 'Western_Gray_Squirrel', 'Mountain_Lion', 'Mule_Deer', 'Mountain_Quail', 'Common_Raccoon', 'Spotted_Skunk', 'Striped_Skunk', 'Wild_Turkey', 'White-Tailed_Deer', 'Human', 'Vehicle')
+    categories <- c('empty','American_Badger', 'American_Black_Bear', 'American_Crow', 'American_Marten', 'American_Mink', 'squirrel_spp', 'American_Robin', 'Arctic_Fox', 'Wolf', 'Owl', 'Bighorn_Sheep', 'Jackrabbit', 'Prairie_Dog', 'Vulture', 'Grackle', 'Bobcat', 'Quail', 'Canada_Lynx', 'Caribou', 'Red_Fox', 'Egret', 'Chipmunk', "Clark's_Nutcracker", 'Collared_Peccary', 'Common_Raccoon', 'Common_Raven', 'Cottontail_Rabbit', 'Coyote', 'Domestic_Cat', 'Domestic_Chicken', 'Domestic_Cow', 'Domestic_Dog', 'Domestic_Donkey', 'Domestic_Goat', 'Domestic_Sheep', 'Dove', 'Dusky_Grouse', 'Spotted_Skunk', 'Golden_Eagle', 'Gray_Fox', 'Gray_Jay', 'Heron', 'Grizzly_Bear', 'Horse', 'Human', 'Iguana', 'Jaguar', 'Jaguarundi', 'Margay', 'Moose', 'Mountain_Lion', 'Mouse_Rat', 'Mule_Deer', 'Nilgai', 'Nine-Banded_Armadillo', 'North American Beaver', 'North_American_Porcupine', 'Ocelot', 'Polar_Bear', 'Prairie_Chicken', 'Pronghorn', 'River_Otter', 'Rocky_Mountain_Elk', 'Ruffed_Grouse', 'Snowshoe_Hare', "Steller's_Jay", 'Striped_Skunk', 'Vehicle', 'Virginia_Opossum', 'White-nosed_Coati', 'White-Tailed_Deer', 'Wild_Pig', 'Wild_Turkey', 'Wolverine', 'Woodchuck', 'Yellow-Bellied_Marmot')
     # remove special characters
     categories <- gsub("'", "", categories)
     categories <- gsub(" ", "_", categories)
@@ -139,7 +139,7 @@ deploy_model <- function(
                                'encoder' = 0:(length(categories)-1))
   }
   if(model_type == "family"){
-    categories <- c('empty', 'Mustelidae', 'Corvidae', 'Sciuridae', 'Turdidae', 'Columbidae', 'Bovidae', 'Leporidae', 'Phasianidae', 'Icteridae', 'Canidae', 'Accipitridae', 'Ursidae', 'Equidae', 'Cervidae', 'Dasypodidae', 'Castoridae', 'Erethizontidae', 'Antilocapridae', 'Mephitidae', 'Didelphidae', 'Felidae', 'Odontophoridae', 'Procyonidae', 'Hominidae')
+    categories <- c('empty','Sciuridae', 'Mustelidae', 'Ursidae', 'Corvidae', 'Turdidae', 'Canidae', 'Columbidae', 'Strigidae', 'Bovidae', 'Ardeidae', 'Leporidae', 'Cathartidae', 'Icteridae', 'Felidae', 'Odontophoridae', 'Cervidae', 'Tayassuidae', 'Procyonidae', 'Phasianidae', 'Equidae', 'Accipitridae', 'Hominidae', 'Iguanidae', 'Aramidae', 'Dasypodidae', 'Castoridae', 'Erethizontidae', 'Antilocapridae', 'Mephitidae', 'vehicle', 'Didelphidae', 'Suidae')
     label_encoder = data.frame('label' = categories,
                                'encoder' = 0:(length(categories)-1))
   }
