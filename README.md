@@ -3,7 +3,7 @@
 
 ## Step 1: Install Microsoft Visual C++
 Note: this step may no longer be necessary. If you are willing to risk it, try skipping this step and reporting to us if you get unexpected errors when running `deploy_model` in step 4. \
-You can install this software from [here](https://aka.ms/vs/16/release/vc_redist.x64.exe). It is free and allows the deep learning packages to work on Windows computers. It is installed like normal software, just follow the guidance in the prompts. 
+You can install this software from [here](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022). It is free and allows the deep learning packages to work on Windows computers. It is installed like normal software, just follow the guidance in the prompts. 
 
 ## Step 2: Install CameraTrapDetectoR
 ```
