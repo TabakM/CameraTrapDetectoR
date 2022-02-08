@@ -49,7 +49,14 @@
 #' @param score_threshold Confidence threshold for using a bounding box. 
 #'  Default is 0.6. A lower number will produce more bboxes (it will be less
 #'  stringent in deciding to make a bbox). A higher number will produce fewer
-#'  bboxes (it will be more stringent). 
+#'  bboxes (it will be more stringent).
+#' @param overlap_correction boolean. Should overlapping detections be
+#' evaluated for overlap and highest confidence detection be returned
+#' @param overlap_threshold Overlap threshold used when determining if bounding box
+#' detections are to be considered a single detection. Accepts values from 0-1
+#' representing the proportion of bounding box overlap.
+#' @param prediction_format The format to be used for the prediction file.  Accepts
+#' values of 'wide' or 'long'.
 #' @param h The image height (in pixels) for the annotated plot. Only used if
 #'  \code{make_plots=TRUE}. 
 #' @param w The image width (in pixels) for the annotated plot.
@@ -78,7 +85,10 @@ deploy_model <- function(
   output_dir = NULL,
   sample50 = FALSE, 
   write_bbox_csv = FALSE, 
+  overlap_correction = TRUE,
+  overlap_threshold = 0.9,
   score_threshold = 0.6,
+  prediction_format = c("wide","long"),
   h=307,
   w=408,
   lty=1,
@@ -86,7 +96,7 @@ deploy_model <- function(
   col='red',
   labeled = FALSE
 ){
-  # check model_tyupe
+  # check model_type
   models_available <- c('general', 'species', 'family', 'mammalBirdVehicle')
   if(!model_type %in% models_available) {
     stop(paste0("model_type must be one of the available options: ",
@@ -159,11 +169,11 @@ deploy_model <- function(
   file_list <- dataset(data_dir, recursive,
                        file_extensions,
                        labeled)
+  
   # subset data, if we want to
   if(sample50 & length(file_list) >50){
     file_list <- sample(file_list, 50)
   }
-  
   
   # make output directory
   if(is.null(output_dir)){
@@ -177,6 +187,9 @@ deploy_model <- function(
   if (!dir.exists(output_dir)){
     dir.create(output_dir)
   }
+  
+  
+  #-- Make predictions for each image
   
   # empty list to hold predictions from loop
   predictions_list <- list()
@@ -202,13 +215,20 @@ deploy_model <- function(
         # get file name
         filename <- file_list[i]
         pred_df <- data.frame(label = 'image_error', XMin = NA, YMin = NA, XMax=NA, YMax=NA,
-                              scores = 1.0, label.y = 'image_error',
-          'filename' = normalizePath(filename))
+                              scores = 1.0, label.y = 'image_error', number_bboxes = NA,
+                              'filename' = normalizePath(filename))
         predictions_list[[i]] <- pred_df
       } else {
         # deploy the model. suppressing warnings here, because it is not important
         output <- suppressWarnings(model(input))
         pred_df <- decode_output(output, label_encoder, 307, score_threshold)
+        pred_df$number_bboxes<-0
+        
+        # address overlapping bboxes
+        if(overlap_correction){
+          pred_df <- reduce_overlapping_bboxes(pred_df, overlap_threshold=overlap_threshold)
+        }
+        
         # subset by score threshold for plotting
         pred_df_plot <- pred_df[pred_df$scores >= score_threshold, ]
         # make plots
@@ -232,7 +252,6 @@ deploy_model <- function(
         predictions_list[[i]] <- pred_df
       }
 
-      
       # update progress bar
         utils::setTxtProgressBar(pb,i) 
    }# end for loop
@@ -243,27 +262,30 @@ deploy_model <- function(
   timeper <- runtime/length(file_list)
   cat(paste0("\nInference time of: ", round(timeper, 3), " seconds per image."))
   
+  
+  #-- Make Output Files
+  
   # combine to df
   predictions_df <- do.call(rbind, predictions_list)
   
   # output dataframe with all predictions for each file
   full_df <- data.frame("filename" = predictions_df$filename
                         , "prediction" = predictions_df$label.y
-                        , "confidence_in_pred" = predictions_df$scores)
-  # subset by confidence
+                        , "confidence_in_pred" = predictions_df$scores
+                        , "number_predictions" = predictions_df$number_bboxes)
+  
+  # subset by confidence score threshold
   full_df <- full_df[full_df$confidence_in_pred >= score_threshold,]
   
   # get just the cross table
   tbl1 <- as.data.frame.matrix(table(full_df[,c("filename", "prediction")]))
   df_out <- data.frame('filename' = rownames((tbl1)),
                        tbl1)
-
+  
   # rownames are filenames; replace with numbers (only if there are actually some images)
   if(nrow(df_out) > 0){
     rownames(df_out) <- 1:nrow(df_out)
   }
-
-  
 
   # add column names for species not found in any images in the dataset
   cols_df <- colnames(df_out)
@@ -288,7 +310,7 @@ deploy_model <- function(
    
   df_out <- df_out[cols_wanted]
   
-  # find values of file_lis that are not in df_out. These are empty files, add them to df_out
+  # find values of file_list that are not in df_out. These are empty files, add them to df_out
   file_names_to_add <- setdiff(normalizePath(file_list), df_out$filename)
   if(length(file_names_to_add) > 0){
     df_add <- data.frame('filename' = file_names_to_add, 
@@ -305,20 +327,52 @@ deploy_model <- function(
     df_out <- df_out[order(df_out$filename), ]
   }
   
+  # make long format prediction file
+  if(prediction_format=="long"){
+    require(operators)  
+    
+    # add certainty measure
+    full_df$certainty <- "single_prediction"
+    full_df[full_df$number_predictions>1,"certainty"] <-"multiple_predictions"
+    
+    # count detections by image and prediction
+    full_df_cnt <- plyr::count(full_df[,c("filename","prediction","certainty")])
+    colnames(full_df_cnt) <- c("filename","prediction","certainty","count")
+    
+    # add empty images
+    empty.images<-normalizePath(file_list[normalizePath(file_list) %!in% full_df_cnt$filename])
+    
+    empty.images<-cbind.data.frame(filename=empty.images,
+                                   prediction=rep("empty",length(empty.images)),
+                                   certainty=rep(NA,length(empty.images)),
+                                   count=rep(0,length(empty.images)))
+    
+    full_df_cnt<-rbind.data.frame(full_df_cnt,empty.images)
+    
+    full_df_cnt<-full_df_cnt[order(full_df_cnt$filename,full_df_cnt$prediction),]
+  }
   
   
-  # write out dataframe
-  utils::write.csv(df_out, file.path(output_dir, 'model_predictions.csv'), row.names=FALSE)
+  #---- Write Files ----
+  
+  # Write Model Predictions
+  if(prediction_format=="wide"){
+    utils::write.csv(df_out, file.path(output_dir, 'model_predictions.csv'), row.names=FALSE)
+  }
+  if(prediction_format=="long"){
+    utils::write.csv(full_df_cnt, file.path(output_dir, 'model_predictions.csv'), row.names=FALSE)
+  }
   
   cat(paste0("\nOutput can be found at: \n", normalizePath(output_dir), "\n",
              "The number of animals predicted in each category in each image is in the file model_predictions.csv\n"))
   
-  # write out bounding box file, if told to
+  # Write Bounding Box File
   if(write_bbox_csv){
     # rearrange predictions_df, convert coordinates to 0-1 scale
     bbox_df <- data.frame("filename" = predictions_df$filename,
                           "prediction" = predictions_df$label.y,
                           "confidence" = predictions_df$scores,
+                          "number_predictions" = predictions_df$number_detections,
                           "XMin" = as.numeric(predictions_df$XMin)/w,
                           "XMax" = as.numeric(predictions_df$XMax)/w,
                           # The Y values are reversed, becasue I had to subtract from one
@@ -328,7 +382,7 @@ deploy_model <- function(
     cat(paste0("The coordinates of predicted bounding boxes are in the file predicted_bboxes.csv"))
   }
   
-  # save arguments to file
+  # Write Arguments to File
   arguments <- list (
     data_dir = normalizePath(data_dir),
     model_type = model_type,
@@ -353,4 +407,4 @@ deploy_model <- function(
   sink()
   
   return(df_out)
-}
+}#END Function
