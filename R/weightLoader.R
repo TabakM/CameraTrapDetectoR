@@ -53,7 +53,7 @@ weightLoader <- function(
     dll_path <- download_cache(dll_url)
     dyn.load(dll_path)
 
-    arch_path <- download_cache(url="https://www.dropbox.com/s/r1pazpf8db2o003/fasterrcnn_5classes.pt?raw=1")
+    arch_path <- download_cache(url="https://www.dropbox.com/s/2lbd9t85knhhic2/fasterrcnn_5classes.pt?raw=1")
     #arch_path <- "C:/Users/mtabak/projects/aphis_cftep_2021_2022/fasterrcnn_5classes.pt"
     model <- torch::jit_load(arch_path)
 
