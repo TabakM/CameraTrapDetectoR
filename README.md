@@ -1,9 +1,12 @@
 ﻿# CameraTrapDetectoR: Detect, classify, and count animals in camera trap images
  Note: This package is currently only available for Windows computers. Support for Mac and Linux will soon be available. 
 
-## Step 1: Install Microsoft Visual C++
-Note: this step may no longer be necessary. If you are willing to risk it, try skipping this step and reporting to us if you get unexpected errors when running `deploy_model` in step 4. \
-You can install this software from [here](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022). It is free and allows the deep learning packages to work on Windows computers. It is installed like normal software, just follow the guidance in the prompts. 
+## Step 1: Install Microsoft Visual C++ and update R, if applicable
+Note: Microsoft Visual C++ step may no longer be necessary. If you are willing to risk it, try skipping this step and reporting to us if you get unexpected errors when running `deploy_model` in step 4. \
+\
+You can [install Microsoft Visual C++ from here](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022). It is free and allows the deep learning packages to work on Windows computers. It is installed like normal software, just follow the guidance in the prompts. \
+\
+You need to be running R version 4.1 for this package to work. If you are unsure of your R version, type `R.Version()` into the console. Update if necessary
 
 ## Step 2: Install CameraTrapDetectoR
 ```
