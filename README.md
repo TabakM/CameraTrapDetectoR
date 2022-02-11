@@ -16,6 +16,7 @@ if (!require('devtools')) install.packages('devtools')
 # install CameraTrapDetectoR
 devtools::install_github("https://github.com/TabakM/CameraTrapDetectoR.git")
 ```
+Agree to update all necessary packages. 
 If running the above command yields an error that looks like `Error: Failed to install 'CameraTrapDetectoR' from GitHub:
   System command 'Rcmd.exe' failed, exit status: 1, stdout + stderr:`, there is a permissions issue on your machine that prevents installation directly from github. [See the instructions below for installing from source](#install-from-source).
 
@@ -24,24 +25,26 @@ If running the above command yields an error that looks like `Error: Failed to i
 library(CameraTrapDetectoR)
 ```
 
-## Step 4: Run the Shiny App (if desired)
-Copy anbd paste this code to the console.
-```
-runShiny("deploy")
-```
-This will launch a Shiny App on your computer. You will need to navigate to your `data_dir`. This is the location where you have camera trap images to be analyzed. All other options in this menu are optional. Hover your mouse over the options for more details, or see the help file in the center of the screen for descriptions of each option.
-
-## Alternative Step 4: Deploy in the console (if you don't want to use Shiny)
+## Step 4: Deploy the model (if you want to use the Shiny App, skip to Alternative Step 4)
 Deploy the model from the console with `deploy_model`
 ```
 # specify the path to your images
-data_dir = "C:/Users/..."
+data_dir = "C:/Users/..." # if you don't know how to specify paths, use the shiny app below. 
 # deploy the model and store the output dataframe as predictions
 predictions <- deploy_model(data_dir,
                             make_plots=TRUE, # this will plot the image and predicted bounding boxes
                             sample50 = TRUE) # this will cause the model to only work on 50 random images in your dataset. To do the whole dataset, set this to FALSE
 ```
 There are many more options for this function. Type `?deploy_model` for details. 
+
+## Alternative Step 4: Deploy using the Shiny App (if desired)
+Copy and paste this code to the console.
+```
+runShiny("deploy")
+```
+This will launch a Shiny App on your computer. You will need to navigate to your `data_dir`. This is the location where you have camera trap images to be analyzed. All other options in this menu are optional. Hover your mouse over the options for more details, or see the help file in the center of the screen for descriptions of each option.
+
+
 
 \
 \
