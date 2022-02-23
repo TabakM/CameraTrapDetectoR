@@ -26,8 +26,16 @@ decode_output <- function(
              'scores' = scores,
              'label' = img_labels)
   
-  # make columnnames make sene
+  # assign column names
   colnames(pred_df)[1:4] <- c('XMin', 'YMin', 'XMax', 'YMax')
+  
+  # check to ensure YMax and YMin are returned as expected - if not then reorder columns
+  if(all((h-pred_df$YMax - h-pred_df$YMin)<0)){
+    # rename switching ymax and ymin
+    colnames(pred_df)[1:4] <- c('XMin', 'YMax', 'XMax', 'YMin')
+    # reorder columns
+    pred_df <- pred_df[,c('XMin', 'YMin', 'XMax', 'YMax', 'scores', 'label')]
+  }
   
   # remove boxes below threshold
   #pred_df <- pred_df[pred_df$scores >= score_threshold, ]
@@ -37,9 +45,13 @@ decode_output <- function(
   # plots are made in R, so I need to inverse this value
   pred_df$YMin <- h-pred_df$YMin
   pred_df$YMax <- h-pred_df$YMax
-  
+
   # get name of label
   pred_df <- merge(pred_df, label_encoder, by.x="label", by.y="encoder")
   
   return(pred_df)
 }
+
+
+
+

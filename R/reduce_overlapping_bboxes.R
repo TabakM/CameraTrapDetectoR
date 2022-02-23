@@ -29,6 +29,10 @@ reduce_overlapping_bboxes <- function(df, overlap_threshold=0.8){
   #--When highest Ensure no duplicates
   out<-unique(out)
   
+  #--When sets overlap and the same box is found in each set aggregate
+  #(this is a short term solution but results in inflated number of bboxes)
+  out<-aggregate(number_bboxes~label+XMin+YMin+XMax+YMax+scores+label.y, data=out, FUN=sum)
+  
   return(out)
 }#END Function
 
