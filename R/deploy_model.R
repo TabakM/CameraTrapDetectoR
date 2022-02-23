@@ -88,6 +88,7 @@ deploy_model <- function(
   overlap_correction = TRUE,
   overlap_threshold = 0.9,
   score_threshold = 0.6,
+  return_data_frame = TRUE,
   prediction_format = c("wide","long"),
   h=307,
   w=408,
@@ -96,6 +97,9 @@ deploy_model <- function(
   col='red',
   labeled = FALSE
 ){
+  
+  #-- Check arguments provided 
+  
   # check model_type
   models_available <- c('general', 'species', 'family', 'mammalBirdVehicle')
   if(!model_type %in% models_available) {
@@ -126,6 +130,9 @@ deploy_model <- function(
   if (lwd <= 0){
     stop("lwd value must be greater than 0")
   }
+  
+  
+  #-- Load model
   
   # load encoder. build these dataframes in the script to avoid attaching tables
   if(model_type == "mammalBirdVehicle"){
@@ -200,9 +207,10 @@ deploy_model <- function(
     cat(paste0("During deployment, you can optionally view predicted bounding boxes as they are produced in: ",
                normalizePath(output_dir), "\n"))
   }
-    pb = utils::txtProgressBar(min = 0, max = length(file_list), initial = 0,
+  pb = utils::txtProgressBar(min = 0, max = length(file_list), initial = 0,
                                style=3, char="*")  
   
+  # loop over each image
   toc <- Sys.time()
   torch::with_no_grad({
     for(i in 1:length(file_list)){
@@ -220,15 +228,24 @@ deploy_model <- function(
         predictions_list[[i]] <- pred_df
       } else {
         # deploy the model. suppressing warnings here, because it is not important
-        output <- suppressWarnings(model(input))
+        defaultW <- getOption("warn")
+        output <- suppressMessages({model(input)})
+        options(warn = defaultW)
+        
         pred_df <- decode_output(output, label_encoder, 307, score_threshold)
-        pred_df$number_bboxes<-0
         
-        # address overlapping bboxes
-        if(overlap_correction){
-          pred_df <- reduce_overlapping_bboxes(pred_df, overlap_threshold=overlap_threshold)
-        }
+          if(nrow(pred_df)==1){
+            pred_df$number_bboxes<-1
+            }
         
+          if(nrow(pred_df) > 1) {
+            pred_df$number_bboxes<-0
+            
+            # address overlapping bboxes
+            if(overlap_correction){
+              pred_df <- reduce_overlapping_bboxes(pred_df, overlap_threshold)
+            }
+          }
         # subset by score threshold for plotting
         pred_df_plot <- pred_df[pred_df$scores >= score_threshold, ]
         # make plots
@@ -244,7 +261,14 @@ deploy_model <- function(
           background_encoder <- label_encoder[which("empty"%in%label_encoder$label),]$encoder
           pred_df[1,] <- c(0, # using 0 instead of background_encoder, because empty will always be 0
                            rep(NA, (ncol(pred_df)-2)),
-                           "empty") 
+                           "empty")
+          
+          # add column for number of bboxes
+          pred_df$number_bboxes<-0
+          
+          # add value for scores to address NA logical issues later
+          pred_df$scores<-1.0
+          
         }
         
         # add prediction df to list
@@ -265,7 +289,7 @@ deploy_model <- function(
   
   #-- Make Output Files
   
-  # combine to df
+  # convert list into dataframe
   predictions_df <- do.call(rbind, predictions_list)
   
   # output dataframe with all predictions for each file
@@ -275,79 +299,96 @@ deploy_model <- function(
                         , "number_predictions" = predictions_df$number_bboxes)
   
   # subset by confidence score threshold
-  full_df <- full_df[full_df$confidence_in_pred >= score_threshold,]
-  
-  # get just the cross table
-  tbl1 <- as.data.frame.matrix(table(full_df[,c("filename", "prediction")]))
-  df_out <- data.frame('filename' = rownames((tbl1)),
-                       tbl1)
-  
-  # rownames are filenames; replace with numbers (only if there are actually some images)
-  if(nrow(df_out) > 0){
-    rownames(df_out) <- 1:nrow(df_out)
-  }
-
-  # add column names for species not found in any images in the dataset
-  cols_df <- colnames(df_out)
-  all_categories <- c(label_encoder$label, 'image_error')
-  not_pred_in_any <- setdiff(all_categories, cols_df) # categories not predicted to be in any image
-  # remove background, I don't need a column for this because I have "empty"
-  not_pred_in_any <- not_pred_in_any[!(not_pred_in_any %in% "background")]
-  # make these into a dataframe taht I can add to df_out
-  not_pred_df <- data.frame(matrix(0, ncol=length(not_pred_in_any), nrow=nrow(df_out)))
-  colnames(not_pred_df) <- not_pred_in_any
-  # add these columns to df_out
-  df_out <- data.frame(df_out, not_pred_df)
-  
-  # re-arrange columns of df_out
-  cols_wanted0 <- label_encoder$label[!(label_encoder$label %in% "background")]
-  # if there are images with errors, include a column for this
-  if("image_error" %in% colnames(tbl1)){
-    cols_wanted <- c("filename", cols_wanted0, 'image_error')
-  }else{
-    cols_wanted <- c("filename", cols_wanted0)
-  }
-   
-  df_out <- df_out[cols_wanted]
-  
-  # find values of file_list that are not in df_out. These are empty files, add them to df_out
-  file_names_to_add <- setdiff(normalizePath(file_list), df_out$filename)
-  if(length(file_names_to_add) > 0){
-    df_add <- data.frame('filename' = file_names_to_add, 
-                         # matrrix of 0s to match df_out
-                         matrix(0, length(file_names_to_add), (ncol(df_out) -1))
-                         )
-    colnames(df_add) <- colnames(df_out)
-    # assign these rows as empty
-    df_add$empty <- rep(1, length(file_names_to_add))
-    # add this df to df_out
-    df_out <- rbind(df_out, df_add)
+  full_df <- apply_score_threshold(full_df, file_list, score_threshold)
     
-    # sort the dataframe, so that it matches the order of images (and of plots made by this package)
-    df_out <- df_out[order(df_out$filename), ]
+  
+  #-- Make Predictions Dataframe
+  
+  # make wide format prediction file
+  if(prediction_format=="wide"){
+  
+    # get just the cross table
+    tbl1 <- as.data.frame.matrix(table(full_df[,c("filename", "prediction")]))
+    df_out <- data.frame('filename' = rownames((tbl1)),
+                         tbl1)
+    
+    # rownames are filenames; replace with numbers (only if there are actually some images)
+    if(nrow(df_out) > 0){
+      rownames(df_out) <- 1:nrow(df_out)
+    }
+  
+    # add column names for species not found in any images in the dataset
+    cols_df <- colnames(df_out)
+    all_categories <- c(label_encoder$label, 'image_error')
+    not_pred_in_any <- setdiff(all_categories, cols_df) # categories not predicted to be in any image
+    # remove background, I don't need a column for this because I have "empty"
+    not_pred_in_any <- not_pred_in_any[!(not_pred_in_any %in% "background")]
+    # make these into a dataframe that I can add to df_out
+    not_pred_df <- data.frame(matrix(0, ncol=length(not_pred_in_any), nrow=nrow(df_out)))
+    colnames(not_pred_df) <- not_pred_in_any
+    # add these columns to df_out
+    df_out <- data.frame(df_out, not_pred_df)
+    
+    # re-arrange columns of df_out
+    cols_wanted0 <- label_encoder$label[!(label_encoder$label %in% "background")]
+    # if there are images with errors, include a column for this
+    if("image_error" %in% colnames(tbl1)){
+      cols_wanted <- c("filename", cols_wanted0, 'image_error')
+    }else{
+      cols_wanted <- c("filename", cols_wanted0)
+    }
+     
+    df_out <- df_out[cols_wanted]
+    
+    # find values of file_list that are not in df_out. These are empty files, add them to df_out
+    file_names_to_add <- setdiff(normalizePath(file_list), df_out$filename)
+    if(length(file_names_to_add) > 0){
+      df_add <- data.frame('filename' = file_names_to_add, 
+                           # matrrix of 0s to match df_out
+                           matrix(0, length(file_names_to_add), (ncol(df_out) -1))
+                           )
+      colnames(df_add) <- colnames(df_out)
+      # assign these rows as empty
+      df_add$empty <- rep(1, length(file_names_to_add))
+      # add this df to df_out
+      df_out <- rbind(df_out, df_add)
+      
+      # sort the dataframe, so that it matches the order of images (and of plots made by this package)
+      df_out <- df_out[order(df_out$filename), ]
+    }
   }
   
   # make long format prediction file
   if(prediction_format=="long"){
     require(operators)  
     
-    # add certainty measure
+    # add certainty measures
     full_df$certainty <- "single_prediction"
+    
+    # if number of predictions is > 1 indicate that there are multiple predictions
     full_df[full_df$number_predictions>1,"certainty"] <-"multiple_predictions"
     
-    # count detections by image and prediction
-    full_df_cnt <- plyr::count(full_df[,c("filename","prediction","certainty")])
-    colnames(full_df_cnt) <- c("filename","prediction","certainty","count")
+    # if model did not detect object
+    full_df[full_df$prediction=="empty","certainty"] <-"no_detection"
     
-    # add empty images
-    empty.images<-normalizePath(file_list[normalizePath(file_list) %!in% full_df_cnt$filename])
+    full_df[full_df$prediction=="empty" & full_df$confidence_in_pred<1,"certainty"] <-"detections_below_score_threshold"
     
-    empty.images<-cbind.data.frame(filename=empty.images,
-                                   prediction=rep("empty",length(empty.images)),
-                                   certainty=rep(NA,length(empty.images)),
-                                   count=rep(0,length(empty.images)))
+    min.vals<-aggregate(confidence_in_pred~filename+prediction+certainty,
+                        data=full_df[full_df$certainty!="detections_below_score_threshold",],
+                        FUN=min)
     
-    full_df_cnt<-rbind.data.frame(full_df_cnt,empty.images)
+    cnt.val<-aggregate(number_predictions~filename+prediction+certainty,
+                       data=full_df[full_df$certainty!="detections_below_score_threshold",],
+                       FUN=length)  
+    
+    det_df<-cbind.data.frame(min.vals,number_predictions=cnt.val[,"number_predictions"])
+    det_df<-det_df[,colnames(full_df)]
+    
+    full_df_cnt<-rbind.data.frame(det_df, full_df[full_df$certainty=="detections_below_score_threshold",])
+    colnames(full_df_cnt) <- c("filename","prediction","confidence_in_pred","count","certainty")
+    
+    # assign zero to counts if empty
+    full_df_cnt[full_df_cnt$prediction=="empty","count"]<-0
     
     full_df_cnt<-full_df_cnt[order(full_df_cnt$filename,full_df_cnt$prediction),]
   }
@@ -372,12 +413,11 @@ deploy_model <- function(
     bbox_df <- data.frame("filename" = predictions_df$filename,
                           "prediction" = predictions_df$label.y,
                           "confidence" = predictions_df$scores,
-                          "number_predictions" = predictions_df$number_detections,
+                          "number_predictions" = predictions_df$number_bboxes,
                           "XMin" = as.numeric(predictions_df$XMin)/w,
                           "XMax" = as.numeric(predictions_df$XMax)/w,
-                          # The Y values are reversed, becasue I had to subtract from one
-                          "YMin" = as.numeric(predictions_df$YMax)/h,
-                          "YMax" = as.numeric(predictions_df$YMin)/h)
+                          "YMin" = as.numeric(predictions_df$YMin)/h,
+                          "YMax" = as.numeric(predictions_df$YMax)/h)
     utils::write.csv(bbox_df, file.path(output_dir, "predicted_bboxes.csv"), row.names=FALSE)
     cat(paste0("The coordinates of predicted bounding boxes are in the file predicted_bboxes.csv"))
   }
@@ -393,18 +433,25 @@ deploy_model <- function(
     output_dir = normalizePath(output_dir),
     sample50 = sample50, 
     write_bbox_csv = write_bbox_csv, 
+    overlap_correction = overlap_correction,
+    overlap_threshold = overlap_threshold,
     score_threshold = score_threshold,
+    prediction_format = prediction_format,
     h=h,
     w=w,
     lty=lty,
     lwd=lwd, 
     col=col
-  )
+    )
   # write file
   #lapply(arguments, cat, "\n", file=file.path(output_dir, "arguments.txt"), append=TRUE)
   sink(file.path(output_dir, "arguments.txt"))
   print(arguments)
   sink()
   
-  return(df_out)
+  # return data frame
+  if(return_data_frame){
+    if(prediction_format=="long"){return(full_df_cnt)}
+    if(prediction_format=="wide"){return(df_out)}
+  }
 }#END Function
