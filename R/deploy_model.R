@@ -223,7 +223,7 @@ deploy_model <- function(
         # get file name
         filename <- file_list[i]
         pred_df <- data.frame(label = 'image_error', XMin = NA, YMin = NA, XMax=NA, YMax=NA,
-                              scores = 1.0, label.y = 'image_error', number_bboxes = NA,
+                              scores = 1.0, label.y = 'image_error', number_bboxes = 0,
                               'filename' = normalizePath(filename))
         predictions_list[[i]] <- pred_df
       } else {
