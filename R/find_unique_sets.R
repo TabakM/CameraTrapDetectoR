@@ -10,41 +10,101 @@
 #' @export
 #' 
 
-
-find_unique_sets <- function(df, overlap_threshold){  
-  require(sf)
+find_unique_sets <- function(df, overlap_threshold=overlap_threshold){
   
-  #--Suppress SF warnings
-  oldw <- getOption("warn")
-  options(warn = -1)
+  mat<-find_all_combinations(df)
+  overlap.val<-vector()  
   
-  #--Add ID
-  df$id <- rownames(df)
+  for(j in 1:nrow(mat)){
+    vec<-mat[j,]
+    vec<-which(vec==1)
+    
+    a<-df[vec[1],c("XMin","XMax","YMin","YMax")]
+    b<-df[vec[2],c("XMin","XMax","YMin","YMax")]
+    
+    #--FNC - Determine Overlap
+    overlap.val[j] <-determine_overlap(a,b)
+  }#END Loop
   
-  #--Helper function - Make Polygons  
-  lst <- lapply(1:nrow(df), function(x){
-    res <- matrix(c(df[x, 'YMax'], df[x, 'XMin'],
-                    df[x, 'YMax'], df[x, 'XMax'],
-                    df[x, 'YMin'], df[x, 'XMax'],
-                    df[x, 'YMin'], df[x, 'XMin'],
-                    df[x, 'YMax'], df[x, 'XMin'])
-                  , ncol =2, byrow = T
-    )
-    st_polygon(list(res))
-  })
+  #--Restrict using overlap_threshold
+  mat<-cbind.data.frame(mat,overlap.val)
   
-  #--Make polygons
-  sfdf <- st_sf(geohash = df[, 'id'], st_sfc(lst))
+  #--Save columns
+  col.vec<-seq(1,ncol(mat)-1,1)
   
-  #--Intersect polygons
-  #inter.val <- st_intersects(sfdf,sfdf)
-  inter.val <- find_sets_with_threshold(x=sfdf, y=sfdf, overlap_threshold)
+  #--Remove overlaps = 0 (no overlap)
+  mat<-mat[mat$overlap.val!=0,]
   
-  #--Find unique sets
-  unique.sets<-unique(inter.val)
+  #--Apply overlap threshold
+  mat<-mat[mat$overlap.val>=overlap_threshold,]
   
-  #--Turn warnings back on
-  options(warn = oldw)
+  #--Remove overlap
+  mat<-mat[,colnames(mat)!="overlap.val"]
+  
+  #--Assign values
+  for(k in 1:ncol(mat)){
+    v<-mat[,k]
+    v[v!=0]<-k
+    mat[,k]<-v
+  }
+  
+  #-- If length of mat >0
+  if(nrow(mat)>0){
+    
+    #--Remove columns with all zeros
+    mat<-mat[, colSums(mat != 0) > 0]
+    
+    #--Order data
+    mat<-mat[do.call(order, c(mat, list(decreasing=TRUE))),]
+    
+    #--Find Unique Sets
+    for(k in 1:ncol(mat)){
+      if(k==1){unique.sets<-list()}
+      
+      tmp <- mat[which(mat[,k]==k),]
+      
+      vec <- as.vector(as.matrix(tmp))
+      unique.sets[[k]] <- unique(vec[vec!=0])
+    }
+    
+    #--Keep unique sets and remove empty
+    unique.sets <- unique(unique.sets)
+    unique.sets<-unique.sets[lapply(unique.sets, length)>0]
+    
+    
+    #--Add sets of 1
+    set.vec<-unique(unlist(unique.sets))
+    col.vec<-col.vec[col.vec %!in% set.vec]
+    
+    if(length(col.vec)>0){
+      add.sets<-list()
+      for(i in 1:length(col.vec)){
+        add.sets[[i]]<-col.vec
+      }
+      
+      #--Merge sets
+      unique.sets<-c(unique.sets,add.sets)
+      
+      #--Keep unique sets and remove empty
+      unique.sets <- unique(unique.sets)
+      unique.sets<-unique.sets[lapply(unique.sets, length)>0]
+    }
+  }
+  
+  #-- If overlap threshold results in no overlapping bboxes
+  # then return unique set for each box
+  if(nrow(mat)==0){
+    unique.sets <- list()
+    for(j in 1:ncol(mat)){
+      unique.sets[[j]]<-j
+    }
+  }
   
   return(unique.sets)
 }#END Function
+
+
+
+
+
+
