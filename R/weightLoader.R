@@ -33,7 +33,7 @@ weightLoader <- function(
     state_dict <- torch::load_state_dict(path2weights)
     # load the torchvision ops
     dll_path <- download_cache(dll_url)
-    dyn.load(dll_path)
+    #dyn.load(dll_path)
     # load architecture
     #model <- torch::jit_load("fasterrcnn_4classes.pt")
     # model <- torch::jit_load(system.file("lib/fasterrcnn_4classes.pt", 
@@ -51,7 +51,7 @@ weightLoader <- function(
     state_dict <- torch::load_state_dict(path2weights)
     # load the torchvision ops
     dll_path <- download_cache(dll_url)
-    dyn.load(dll_path)
+    #dyn.load(dll_path)
 
     arch_path <- download_cache(url="https://www.dropbox.com/s/r1pazpf8db2o003/fasterrcnn_5classes.pt?raw=1")
     #arch_path <- "C:/Users/mtabak/projects/aphis_cftep_2021_2022/fasterrcnn_5classes.pt"
@@ -67,7 +67,7 @@ weightLoader <- function(
     state_dict <- torch::load_state_dict(path2weights)
     # load the torchvision ops
     dll_path <- download_cache(dll_url)
-    dyn.load(dll_path)
+    #dyn.load(dll_path)
     
     arch_path <- download_cache(url="https://www.dropbox.com/s/jdfjnbfagvn4hfq/fasterrcnnArch_77classes.pt?raw=1")
     #arch_path <- "C:/Users/mtabak/projects/aphis_cftep_2021_2022/fasterrcnn_5classes.pt"
@@ -83,7 +83,7 @@ weightLoader <- function(
     state_dict <- torch::load_state_dict(path2weights)
     # load the torchvision ops
     dll_path <- download_cache(dll_url)
-    dyn.load(dll_path)
+    #dyn.load(dll_path)
     
     arch_path <- download_cache(url="https://www.dropbox.com/s/7chzc8boc5ruxab/fasterrcnnArch_33classes.pt?raw=1")
     #arch_path <- "C:/Users/mtabak/projects/aphis_cftep_2021_2022/fasterrcnnArch_25classes.pt"
