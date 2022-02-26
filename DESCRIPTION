@@ -9,4 +9,4 @@ License: GPL-2
 Encoding: UTF-8
 LazyData: yes
 RoxygenNote: 7.1.2
-Imports: torchvision (>= 0.4.0), torch (== 0.6.0), magick, shiny, shinyFiles, shinyBS, shinyjs, fs, rappdirs
+Imports: torchvision (>= 0.4.0), torch (>= 0.6.0), magick, shiny, shinyFiles, shinyBS, shinyjs, fs, rappdirs
