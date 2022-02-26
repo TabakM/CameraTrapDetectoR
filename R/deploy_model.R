@@ -89,7 +89,7 @@ deploy_model <- function(
   overlap_threshold = 0.9,
   score_threshold = 0.6,
   return_data_frame = TRUE,
-  prediction_format = c("wide","long"),
+  prediction_format = "wide",
   h=307,
   w=408,
   lty=1,
