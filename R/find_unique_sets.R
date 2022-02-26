@@ -12,6 +12,9 @@
 
 find_unique_sets <- function(df, overlap_threshold=overlap_threshold){
   
+  #--Define functions
+  '%!in%' <- function(x,y)!('%in%'(x,y))
+  
   mat<-find_all_combinations(df)
   overlap.val<-vector()  
   
