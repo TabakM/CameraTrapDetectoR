@@ -98,6 +98,9 @@ deploy_model <- function(
   labeled = FALSE
 ){
   
+  #-- Load operators
+  load_operators()
+    
   #-- Check arguments provided 
   
   # check model_type
