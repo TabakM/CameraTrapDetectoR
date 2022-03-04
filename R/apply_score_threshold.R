@@ -21,7 +21,7 @@ apply_score_threshold <- function(df, file_list, score_threshold){
   limted_df <- df[df$confidence_in_pred >= score_threshold,]
   
   #--Generate list of images that have been removed
-  empty.images<-normalizePath(file_list[normalizePath(file_list) %!in% limted_df$filename])
+  empty.images<-normalizePath(file_list[!normalizePath(file_list) %in% limted_df$filename])
   
   #--If applying threshold results in empty images
   if(length(empty.images)>0){
