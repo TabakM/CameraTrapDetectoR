@@ -74,7 +74,7 @@ find_unique_sets <- function(df, overlap_threshold=overlap_threshold){
     
     #--Add sets of 1
     set.vec<-unique(unlist(unique.sets))
-    col.vec<-col.vec[col.vec %!in% set.vec]
+    col.vec<-col.vec[!col.vec %in% set.vec]
     
     if(length(col.vec)>0){
       add.sets<-list()
