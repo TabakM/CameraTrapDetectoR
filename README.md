@@ -1,8 +1,12 @@
 ﻿# CameraTrapDetectoR: Detect, classify, and count animals in camera trap images
+ Note: This package is currently only available for Windows computers. Support for Mac and Linux will soon be available. 
 
-## Step 1: Install Microsoft Visual C++
-You can install this software from [here](https://aka.ms/vs/16/release/vc_redist.x64.exe). It is free and allows the deep learning packages to work on Windows computers. It is installed like normal software, just follow the guidance in the prompts. \
-Note: this step may no longer be necessary with the current version of torch.
+## Step 1: Install Microsoft Visual C++ and update R, if applicable
+Note: Microsoft Visual C++ step may no longer be necessary. If you are willing to risk it, try skipping this step and reporting to us if you get unexpected errors when running `deploy_model` in step 4. \
+\
+You can [install Microsoft Visual C++ from here](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022). It is free and allows the deep learning packages to work on Windows computers. It is installed like normal software, just follow the guidance in the prompts. \
+\
+You need to be running R version 4.1 for this package to work. If you are unsure of your R version, type `R.Version()` into the console. Update if necessary
 
 ## Step 2: Install CameraTrapDetectoR
 ```
@@ -12,6 +16,7 @@ if (!require('devtools')) install.packages('devtools')
 # install CameraTrapDetectoR
 devtools::install_github("https://github.com/TabakM/CameraTrapDetectoR.git")
 ```
+Agree to update all necessary packages. 
 If running the above command yields an error that looks like `Error: Failed to install 'CameraTrapDetectoR' from GitHub:
   System command 'Rcmd.exe' failed, exit status: 1, stdout + stderr:`, there is a permissions issue on your machine that prevents installation directly from github. [See the instructions below for installing from source](#install-from-source).
 
@@ -20,24 +25,26 @@ If running the above command yields an error that looks like `Error: Failed to i
 library(CameraTrapDetectoR)
 ```
 
-## Step 4: Run the Shiny App (if desired)
-Copy anbd paste this code to the console.
-```
-runShiny("deploy")
-```
-This will launch a Shiny App on your computer. You will need to navigate to your `data_dir`. This is the location where you have camera trap images to be analyzed. All other options in this menu are optional. Hover your mouse over the options for more details, or see the help file in the center of the screen for descriptions of each option.
-
-## Alternative Step 4: Deploy in the console (if you don't want to use Shiny)
+## Step 4: Deploy the model (if you want to use the Shiny App, skip to Alternative Step 4)
 Deploy the model from the console with `deploy_model`
 ```
 # specify the path to your images
-data_dir = "C:/Users/..."
+data_dir = "C:/Users/..." # if you don't know how to specify paths, use the shiny app below. 
 # deploy the model and store the output dataframe as predictions
 predictions <- deploy_model(data_dir,
                             make_plots=TRUE, # this will plot the image and predicted bounding boxes
                             sample50 = TRUE) # this will cause the model to only work on 50 random images in your dataset. To do the whole dataset, set this to FALSE
 ```
 There are many more options for this function. Type `?deploy_model` for details. 
+
+## Alternative Step 4: Deploy using the Shiny App (if desired)
+Copy and paste this code to the console.
+```
+runShiny("deploy")
+```
+This will launch a Shiny App on your computer. You will need to navigate to your `data_dir`. This is the location where you have camera trap images to be analyzed. All other options in this menu are optional. Hover your mouse over the options for more details, or see the help file in the center of the screen for descriptions of each option.
+
+
 
 \
 \
@@ -86,4 +93,23 @@ install_dependencies()
 - click `install`
 
 ## Return to [Step 3](#step-3-load-this-library) above to use the package. 
+
+
+## Citation
+
+Tabak, M. A., Falbel, D., Hamzeh, T., Brook, R. K., Goolsby, J. A., Zoromski, L. D., Boughton, R. K., Snow, N. P., VerCauteren, K. C., & Miller, R. S. (2022). CameraTrapDetectoR: Automatically detect, classify, and count animals in camera trap images using artificial intelligence (p. 2022.02.07.479461). bioRxiv. [link to manuscript](https://doi.org/10.1101/2022.02.07.479461)
+
+Or\
+@article {Tabak2022.02.07.479461,
+	author = {Tabak, Michael A and Falbel, Daniel and Hamzeh, Tess and Brook, Ryan K and Goolsby, John A and Zoromski, Lisa D and Boughton, Raoul K and Snow, Nathan P and VerCauteren, Kurt C and Miller, Ryan S},
+	title = {CameraTrapDetectoR: Automatically detect, classify, and count animals in camera trap images using artificial intelligence},
+	elocation-id = {2022.02.07.479461},
+	year = {2022},
+	doi = {10.1101/2022.02.07.479461},
+	publisher = {Cold Spring Harbor Laboratory},,
+	URL = {https://www.biorxiv.org/content/early/2022/02/09/2022.02.07.479461},
+	eprint = {https://www.biorxiv.org/content/early/2022/02/09/2022.02.07.479461.full.pdf},
+	journal = {bioRxiv}
+}
+
 

@@ -21,4 +21,4 @@ find_all_combinations <- function(df){
   mat<-mat[,colnames(mat)!="tot"]
   
   return(mat)
-}#END Function
+}

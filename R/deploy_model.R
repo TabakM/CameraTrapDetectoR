@@ -457,4 +457,4 @@ deploy_model <- function(
     if(prediction_format=="long"){return(full_df_cnt)}
     if(prediction_format=="wide"){return(df_out)}
   }
-}#END Function
+}

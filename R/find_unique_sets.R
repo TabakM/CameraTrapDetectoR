@@ -101,10 +101,4 @@ find_unique_sets <- function(df, overlap_threshold=overlap_threshold){
   }
   
   return(unique.sets)
-}#END Function
-
-
-
-
-
-
+}

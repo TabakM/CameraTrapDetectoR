@@ -53,5 +53,4 @@ apply_score_threshold <- function(df, file_list, score_threshold){
   }
   
   return(out_df)
-}#END Function
-
+}
