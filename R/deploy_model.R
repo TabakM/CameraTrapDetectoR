@@ -89,7 +89,7 @@ deploy_model <- function(
   overlap_threshold = 0.9,
   score_threshold = 0.6,
   return_data_frame = TRUE,
-  prediction_format = c("wide","long"),
+  prediction_format = "wide",
   h=307,
   w=408,
   lty=1,
@@ -98,6 +98,9 @@ deploy_model <- function(
   labeled = FALSE
 ){
   
+  #-- Load operators
+  load_operators()
+    
   #-- Check arguments provided 
   
   # check model_type
@@ -454,4 +457,4 @@ deploy_model <- function(
     if(prediction_format=="long"){return(full_df_cnt)}
     if(prediction_format=="wide"){return(df_out)}
   }
-}#END Function
+}

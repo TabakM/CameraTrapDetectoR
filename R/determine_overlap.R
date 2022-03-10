@@ -23,9 +23,4 @@ determine_overlap <- function(a,b){
   } else{per.overlap<-0}
   
   return(per.overlap)
-}#END Function
-
-
-
-
-
+}
