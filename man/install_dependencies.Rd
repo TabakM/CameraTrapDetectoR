@@ -6,7 +6,7 @@
 \usage{
 install_dependencies(
   packages = c("torchvision", "torch", "magick", "shiny", "shinyFiles", "shinyBS",
-    "shinyjs", "rappdirs", "fs")
+    "shinyjs", "rappdirs", "fs", "operators")
 )
 }
 \arguments{
