@@ -23,6 +23,7 @@ If running the above command yields an error that looks like `Error: Failed to i
 ## Step 3: Load this library
 ```
 library(CameraTrapDetectoR)
+library(torchvisionlib)
 ```
 
 ## Step 4: Deploy the model (if you want to use the Shiny App, skip to Alternative Step 4)

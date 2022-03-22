@@ -71,6 +71,8 @@ Default is 0.6. A lower number will produce more bboxes (it will be less
 stringent in deciding to make a bbox). A higher number will produce fewer
 bboxes (it will be more stringent).}
 
+\item{return_data_frame}{boolean. Do you want a dataframe returned}
+
 \item{prediction_format}{The format to be used for the prediction file.  Accepts
 values of 'wide' or 'long'.}
 

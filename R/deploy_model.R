@@ -105,7 +105,7 @@ deploy_model <- function(
   #-- Check arguments provided 
   
   # check model_type
-  models_available <- c('general', 'species', 'family', 'mammalBirdVehicle')
+  models_available <- c('general', 'species', 'family', 'mammalBirdVehicle', 'pig_only')
   if(!model_type %in% models_available) {
     stop(paste0("model_type must be one of the available options: ",
                 list(models_available)))
@@ -143,6 +143,10 @@ deploy_model <- function(
     #label_encoder = utils::read.csv("./label_encoders/mammalBirdVehicle.csv")
     label_encoder = data.frame('label' = c('background', 'mammal', 'bird', 'vehicle'),
                                'encoder' = 0:3)
+  }
+  if(model_type == "pig_only"){
+    label_encoder = data.frame('label' = c('empty', 'pig'),
+                               'encoder' = 0:1)
   }
   if(model_type == "general"){
     categories <- c('empty', 'mammal', 'bird', 'human', 'vehicle')
