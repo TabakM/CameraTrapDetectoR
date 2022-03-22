@@ -15,6 +15,9 @@ if (!require('devtools')) install.packages('devtools')
 
 # install CameraTrapDetectoR
 devtools::install_github("https://github.com/TabakM/CameraTrapDetectoR.git")
+
+# install older version of torch on this branch
+install_version("torch", version = "0.6.0", repos = "http://cran.us.r-project.org")
 ```
 Agree to update all necessary packages. 
 If running the above command yields an error that looks like `Error: Failed to install 'CameraTrapDetectoR' from GitHub:
