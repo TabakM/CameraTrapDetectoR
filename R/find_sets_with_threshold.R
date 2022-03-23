@@ -14,12 +14,11 @@
 
 
 find_sets_with_threshold <- function(x, y, overlap_threshold) {
-  require(sf)
   
-  int = st_intersects(x, y)
+  int = sf::st_intersects(x, y)
   lapply(seq_along(int), function(ix)
     if (length(int[[ix]]))
-      int[[ix]][which(st_area(st_intersection(x[ix,], y[int[[ix]],]))/st_area(x[ix,]) > overlap_threshold)]
+      int[[ix]][which(sf::st_area(sf::st_intersection(x[ix,], y[int[[ix]],]))/sf::st_area(x[ix,]) > overlap_threshold)]
     else
       integer(0)
   )
