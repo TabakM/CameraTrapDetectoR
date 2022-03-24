@@ -11,23 +11,74 @@
 #' 
 
 find_unique_sets <- function(df, overlap_threshold=overlap_threshold){
-  
-  mat<-find_all_combinations(df)
-  overlap.val<-vector()  
-  
-  for(j in 1:nrow(mat)){
-    vec<-mat[j,]
-    vec<-which(vec==1)
     
-    a<-df[vec[1],c("XMin","XMax","YMin","YMax")]
-    b<-df[vec[2],c("XMin","XMax","YMin","YMax")]
+  #--Generate overlap if number of detections <=20
+  if(nrow(df)<=20){
+    mat<-find_all_combinations(df)
+    overlap.val<-vector()  
     
-    #--FNC - Determine Overlap
-    overlap.val[j] <-determine_overlap(a,b)
-  }#END Loop
-  
-  #--Restrict using overlap_threshold
-  mat<-cbind.data.frame(mat,overlap.val)
+    for(j in 1:nrow(mat)){
+      vec<-mat[j,]
+      vec<-which(vec==1)
+      
+      a<-df[vec[1],c("XMin","XMax","YMin","YMax")]
+      b<-df[vec[2],c("XMin","XMax","YMin","YMax")]
+      
+      #--FNC - Determine Overlap
+      overlap.val[j] <-determine_overlap(a,b)
+    }#END Loop
+    
+    #Restrict using overlap_threshold
+    mat<-cbind.data.frame(mat,overlap.val)
+  }#END
+    
+  #--Generate overlap if number of detections >20
+  if(nrow(df)>20){
+
+    n<-nrow(df)/4
+    chunks.df<-split(df, (seq(nrow(df))-1) %/% n) 
+    
+    out<-list()
+    for(k in 1:length(chunks.df)){
+      mat<-find_all_combinations(chunks.df[[k]])
+      overlap.val<-vector()  
+      
+      for(j in 1:nrow(mat)){
+        vec<-mat[j,]
+        vec<-which(vec==1)
+        
+        a<-df[vec[1],c("XMin","XMax","YMin","YMax")]
+        b<-df[vec[2],c("XMin","XMax","YMin","YMax")]
+        
+        #--FNC - Determine Overlap
+        overlap.val[j] <-determine_overlap(a,b)
+      }#END Loop
+      
+      #Restrict using overlap_threshold
+      out[[k]]<-cbind.data.frame(mat,overlap.val)
+    }#END Chunk
+    
+    #--Add missing columns
+    col.names<-vector()
+    
+    for(c in 1:length(out)){
+      if(c==1){
+        col.names<-colnames(out[[c]])
+      }
+      if(c>1){
+        col.names<-c(col.names,colnames(out[[c]]))
+      }
+    }
+    col.names<-unique(col.names)    
+    
+    for(c in 1:length(out)){
+      Missing <- setdiff(col.names, names(out[[c]]))
+      out[[c]][Missing] <- 0
+      out[[c]] <- out[[c]][col.names]
+    }
+    
+    mat<-Reduce(rbind.data.frame,out)
+  }#END
   
   #--Save columns
   col.vec<-seq(1,ncol(mat)-1,1)
