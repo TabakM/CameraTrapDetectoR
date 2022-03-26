@@ -28,9 +28,10 @@
 #' @param recursive boolean. Do you have images in subfolders within your
 #'  data_dir that you want to analyze, if so, set to TRUE. If you only want to 
 #'  analyze images within your data_dir and not within sub-folders, set to FALSE.
-#' @param model_type Options are c('general', 'species', 'family'). The `general`
-#'  model predicts to the level of mammal, bird, humans, vehicles. The `species` 
-#'  model recognizes 77 species. The `family` model recognizes 33 families.
+#' @param model_type Options are c('general', 'species', 'family', 'pig_only'). 
+#'  The `general` model predicts to the level of mammal, bird, humans, vehicles. 
+#'  The `species` model recognizes 77 species. The `family` model recognizes 33 families.
+#'  The `pig_only` model recognizes only pigs.
 #' @param file_extensions The types of extensions on your image files. Default 
 #'  is c(".jpg", ".JPG")
 #' @param make_plots boolean. Do you want to make plots of the images with
@@ -46,7 +47,7 @@
 #' @param write_bbox_csv boolean. Do you want to create a csv with all of the 
 #'  information on predicted bounding boxes? This csv will include all bounding boxes,
 #'  even those with low probability. 
-#' @param score_threshold Confidence threshold for using a bounding box, aceepts 
+#' @param score_threshold Confidence threshold for using a bounding box, accepts 
 #'  values from 0-1. A lower number will produce more bboxes (it will be less
 #'  stringent in deciding to make a bbox). A higher number will produce fewer
 #'  bboxes (it will be more stringent).
