@@ -85,8 +85,8 @@ shinyUI(fluidPage(
                                placement = "top"),
             
             ## return_data_frame
-            shiny::selectInput("return_data_frame", "return_data_frame", choices = c(TRUE, FALSE)),
-            shinyBS::bsTooltip("return_data_frame", "Do you want a dataframe returned with predictions for each file? The rows in this dataframe are the file names in your `data_dir`; the columns are the categories in the model. If any of your images were not loaded properly, there will be a column in the dataframe called `image_error`. Images with a 1 in this column had issues and the model was not deployed on them.",
+            shiny::selectInput("return_data_frame", "return_data_frame", choices = c(FALSE, TRUE)),
+            shinyBS::bsTooltip("return_data_frame", "Do you want a dataframe read into R environment with predictions for each file? The rows in this dataframe are the file names in your `data_dir`; the columns are the categories in the model. If any of your images were not loaded properly, there will be a column in the dataframe called `image_error`. Images with a 1 in this column had issues and the model was not deployed on them.",
                                placement = "top"),
             
             ## prediction_format
@@ -119,9 +119,9 @@ shinyUI(fluidPage(
                                selected = "red"),
             shinyBS::bsTooltip("col", "line color for bbox plot", placement = "top"),
             
-            ## labeled
-            shiny::selectInput("labeled", "labeled", choices = c(FALSE, TRUE)),
-            shinyBS::bsTooltip("labeled", "This is not functional yet", placement = "top"),
+            ## labeled - commented out due to non-functionality
+            # shiny::selectInput("labeled", "labeled", choices = c(FALSE, TRUE)),
+            # shinyBS::bsTooltip("labeled", "This is not functional yet", placement = "top"),
             
         ),
         
@@ -149,7 +149,7 @@ shinyUI(fluidPage(
             
             # make rd file as image
             shiny::h3("Below are some more details about each of the options on the left:"),
-            shiny::img(src = "manual_image.png", align="center")
+            shiny::img(src = "manual_image.PNG", align="center")
         )
     )
 ))
