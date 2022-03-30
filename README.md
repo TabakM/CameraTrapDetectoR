@@ -1,8 +1,7 @@
 ﻿# CameraTrapDetectoR: Detect, classify, and count animals in camera trap images
- Note: This package is currently only available for Windows computers. Support for Mac and Linux will soon be available. 
 
 ## Step 1: Install Microsoft Visual C++ and update R, if applicable
-Note: Microsoft Visual C++ step may no longer be necessary. If you are willing to risk it, try skipping this step and reporting to us if you get unexpected errors when running `deploy_model` in step 4. \
+Note: Microsoft Visual C++ step may no longer be necessary, <b>and it is only necessary on Windows Computers</b>. If you are willing to risk it, try skipping this step and reporting to us if you get unexpected errors when running `deploy_model` in step 4. \
 \
 You can [install Microsoft Visual C++ from here](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022). It is free and allows the deep learning packages to work on Windows computers. It is installed like normal software, just follow the guidance in the prompts. \
 \
@@ -23,6 +22,12 @@ If running the above command yields an error that looks like `Error: Failed to i
 ## Step 3: Load this library
 ```
 library(CameraTrapDetectoR)
+library(torchvisionlib)
+```
+
+If you are on a slow internet connection, you will need to modify your options. This is because we will be downloading the weights and architecture of the neural network. By default, R will timeout downloads at 60 seconds. Running this line will increase the timeout. Units are seconds. Feel free to use a larger number than 200 if you are on a very slow connection. 
+```
+options(timeout=200)
 ```
 
 ## Step 4: Deploy the model (if you want to use the Shiny App, skip to Alternative Step 4)
@@ -61,14 +66,15 @@ devtools::install_github("https://github.com/mikeyEcology/CameraTrapDetectoR.git
 If this works, return to [Step 3](#step-3-load-this-library). If it does not, proceed with installation from source. 
 
 ## Download CameraTrapDetectoR
-This [link](https://github.com/TabakM/CameraTrapDetectoR/raw/main/CameraTrapDetectoR_0.0.3.zip) holds the latest version of the package. DO NOT unzip this folder. 
+This [link](https://github.com/TabakM/CameraTrapDetectoR/blob/main/CameraTrapDetectoR_0.1.0.zip) holds the latest version of the package. DO NOT unzip this folder. 
 
 ## Install dependencies
 Copy this code and paste it into your console. It will install all necessary R packages
 ```
 install_dependencies <-function(packages=c('torchvision', 'torch', 'magick', 
                                            'shiny', 'shinyFiles', 'shinyBS', 
-                                           'shinyjs', 'rappdirs', 'fs')) {
+                                           'shinyjs', 'rappdirs', 'fs', 'sf', 
+					   'operators', 'torchvisionlib')) {
   cat(paste0("checking package installation on this computer"))
   libs<-unlist(list(packages))
   req<-unlist(lapply(libs,require,character.only=TRUE))
