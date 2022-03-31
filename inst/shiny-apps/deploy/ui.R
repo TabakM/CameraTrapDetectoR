@@ -19,8 +19,8 @@ shinyUI(fluidPage(
             
             ## model_type
             shiny::selectInput("model_type", "model_type", 
-                        choices = c("general", "species", "family")),
-            shinyBS::bsTooltip("model_type", "This defines how you want to ID animals, generally (to class), to species, or to family",
+                        choices = c("general", "species", "family", "pig_only")),
+            shinyBS::bsTooltip("model_type", "This defines how you want to ID animals, generally (to class), to species, to family, or to pig_only",
                                placement = "top"),
             
             ## recursive
@@ -39,7 +39,7 @@ shinyUI(fluidPage(
                                placement = "top"),
             
             ## make_plots
-            shiny::selectInput("make_plots", "make_plots", choices = c(FALSE, TRUE)),
+            shiny::selectInput("make_plots", "make_plots", choices = c(TRUE, FALSE)),
             shinyBS::bsTooltip("make_plots", "Do you want to make plots of the images with their predicted bounding boxes?", 
                       placement = "top"),
             
@@ -61,16 +61,39 @@ shinyUI(fluidPage(
                                placement = "top"),
             
             ## write_bbox_csv
-            shiny::selectInput("write_bbox_csv", "write_bbox_csv", choices = c(FALSE, TRUE)),
+            shiny::selectInput("write_bbox_csv", "write_bbox_csv", choices = c(TRUE, FALSE)),
             shinyBS::bsTooltip("write_bbox_csv", "Do you want to create a csv with all of the information on predicted bounding boxes?", 
                                placement = "top"),
-            
+
             ## score_threshold
             shiny::numericInput("score_threshold", "score_threshold", value = 0.6, 
                                 min = 0, max = 1, step = 0.01),
             shinyBS::bsTooltip("score_threshold", 
                                "Confidence threshold for using a bounding box. A lower number will produce more bboxes (it will be less stringent in deciding to make a bbox). A higher number will produce fewer bboxes (it will be more stringent).", 
                                placement = "top"),
+            
+            ## overlap_correction
+            shiny::selectInput("overlap_correction", "overlap_correction", choices = c(TRUE, FALSE)),
+            shinyBS::bsTooltip("write_bbox_csv", "Do you want overlapping detections to be evaluated and the detection with highest confidence returned?", 
+                               placement = "top"),
+            
+            ## overlap_threshold
+            shiny::numericInput("overlap_threshold", "overlap_threshold", value = 0.9, 
+                                min = 0, max = 1, step = 0.01),
+            shinyBS::bsTooltip("overlap_threshold", 
+                               "Proportion of bounding box overlap to determine if detections are to be considered a single detection.",
+                               placement = "top"),
+            
+            ## return_data_frame
+            shiny::selectInput("return_data_frame", "return_data_frame", choices = c(FALSE, TRUE)),
+            shinyBS::bsTooltip("return_data_frame", "Do you want a dataframe read into R environment with predictions for each file? The rows in this dataframe are the file names in your `data_dir`; the columns are the categories in the model. If any of your images were not loaded properly, there will be a column in the dataframe called `image_error`. Images with a 1 in this column had issues and the model was not deployed on them.",
+                               placement = "top"),
+            
+            ## prediction_format
+            shiny::selectInput("prediction_format", "prediction_format", choices = c('wide', 'long')),
+            shinyBS::bsTooltip("prediction_format", "What format do you want used for your prediction file?",
+                               placement = "top"),
+            
             ## h
             shiny::numericInput("h", "h", value = 307),
             shinyBS::bsTooltip("h", "The image height (in pixels) for the annotated plot"),
@@ -96,9 +119,9 @@ shinyUI(fluidPage(
                                selected = "red"),
             shinyBS::bsTooltip("col", "line color for bbox plot", placement = "top"),
             
-            ## labeled
-            shiny::selectInput("labeled", "labeled", choices = c(FALSE, TRUE)),
-            shinyBS::bsTooltip("labeled", "This is not functional yet", placement = "top"),
+            ## labeled - commented out due to non-functionality
+            # shiny::selectInput("labeled", "labeled", choices = c(FALSE, TRUE)),
+            # shinyBS::bsTooltip("labeled", "This is not functional yet", placement = "top"),
             
         ),
         
@@ -126,7 +149,7 @@ shinyUI(fluidPage(
             
             # make rd file as image
             shiny::h3("Below are some more details about each of the options on the left:"),
-            shiny::img(src = "manual_image.png", align="center")
+            shiny::img(src = "manual_image.PNG", align="center")
         )
     )
 ))

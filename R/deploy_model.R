@@ -28,9 +28,10 @@
 #' @param recursive boolean. Do you have images in subfolders within your
 #'  data_dir that you want to analyze, if so, set to TRUE. If you only want to 
 #'  analyze images within your data_dir and not within sub-folders, set to FALSE.
-#' @param model_type Options are c('general', 'species', 'family'). The `general`
-#'  model predicts to the level of mammal, bird, humans, vehicles. The `species` 
-#'  model recognizes 77 species. The `family` model recognizes 33 families.
+#' @param model_type Options are c('general', 'species', 'family', 'pig_only'). 
+#'  The `general` model predicts to the level of mammal, bird, humans, vehicles. 
+#'  The `species` model recognizes 77 species. The `family` model recognizes 33 families.
+#'  The `pig_only` model recognizes only pigs.
 #' @param file_extensions The types of extensions on your image files. Default 
 #'  is c(".jpg", ".JPG")
 #' @param make_plots boolean. Do you want to make plots of the images with
@@ -46,8 +47,8 @@
 #' @param write_bbox_csv boolean. Do you want to create a csv with all of the 
 #'  information on predicted bounding boxes? This csv will include all bounding boxes,
 #'  even those with low probability. 
-#' @param score_threshold Confidence threshold for using a bounding box. 
-#'  Default is 0.6. A lower number will produce more bboxes (it will be less
+#' @param score_threshold Confidence threshold for using a bounding box, accepts 
+#'  values from 0-1. A lower number will produce more bboxes (it will be less
 #'  stringent in deciding to make a bbox). A higher number will produce fewer
 #'  bboxes (it will be more stringent).
 #' @param overlap_correction boolean. Should overlapping detections be
@@ -118,6 +119,23 @@ deploy_model <- function(
   if(!all(extension_test)){
     stop(paste0(c("One or more of the `file_extensions` specified is not an accepted format. Please choose one of the accepted formats: \n",
                 acceptable_exts), collapse = " "))
+  }
+  
+  # test overlap_threshold
+  if (overlap_threshold < 0 | overlap_threshold > 1){
+    stop("overlap_threshold must be between 0 and 1")
+  }
+  
+  # test score_threshold
+  if (score_threshold < 0 | score_threshold > 1){
+    stop("score_threshold must be between 0 and 1")
+  }
+  
+  # check prediction_format
+  formats <- c('wide', 'long')
+  if(!prediction_format %in% formats) {
+    stop(paste0("prediction_format must be one of the available options: ",
+                list(formats)))
   }
   
   # test lty 
