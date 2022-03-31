@@ -39,7 +39,7 @@ shinyUI(fluidPage(
                                placement = "top"),
             
             ## make_plots
-            shiny::selectInput("make_plots", "make_plots", choices = c(FALSE, TRUE)),
+            shiny::selectInput("make_plots", "make_plots", choices = c(TRUE, FALSE)),
             shinyBS::bsTooltip("make_plots", "Do you want to make plots of the images with their predicted bounding boxes?", 
                       placement = "top"),
             
@@ -61,7 +61,7 @@ shinyUI(fluidPage(
                                placement = "top"),
             
             ## write_bbox_csv
-            shiny::selectInput("write_bbox_csv", "write_bbox_csv", choices = c(FALSE, TRUE)),
+            shiny::selectInput("write_bbox_csv", "write_bbox_csv", choices = c(TRUE, FALSE)),
             shinyBS::bsTooltip("write_bbox_csv", "Do you want to create a csv with all of the information on predicted bounding boxes?", 
                                placement = "top"),
 
