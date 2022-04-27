@@ -25,7 +25,7 @@
 #'  
 #' 
 #' @param data_dir Absolute path to the folder containing your images
-#' @param recursive boolean. Do you have images in subfolders within your
+#' @param recursive boolean. Do you have images in sub-folders within your
 #'  data_dir that you want to analyze, if so, set to TRUE. If you only want to 
 #'  analyze images within your data_dir and not within sub-folders, set to FALSE.
 #' @param model_type Options are c('general', 'species', 'family', 'pig_only'). 
@@ -88,8 +88,8 @@ deploy_model <- function(
   sample50 = FALSE, 
   write_bbox_csv = FALSE, 
   overlap_correction = TRUE,
-  overlap_threshold = 0.9,
-  score_threshold = 0.6,
+  overlap_threshold = 0.7,
+  score_threshold = 0.5,
   return_data_frame = TRUE,
   prediction_format = "wide",
   h=307,
@@ -122,12 +122,12 @@ deploy_model <- function(
   }
   
   # test overlap_threshold
-  if (overlap_threshold < 0 | overlap_threshold > 1){
+  if (overlap_threshold < 0 | overlap_threshold >= 1){
     stop("overlap_threshold must be between 0 and 1")
   }
   
   # test score_threshold
-  if (score_threshold < 0 | score_threshold > 1){
+  if (score_threshold < 0 | score_threshold >= 1){
     stop("score_threshold must be between 0 and 1")
   }
   
