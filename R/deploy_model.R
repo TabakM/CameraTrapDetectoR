@@ -416,8 +416,13 @@ deploy_model <- function(
     full_df_cnt[full_df_cnt$prediction=="empty","count"]<-0
     
     full_df_cnt<-full_df_cnt[order(full_df_cnt$filename,full_df_cnt$prediction),]
+    
   }
   
+  # add model_type, score_threshold, overlap_threshold to long df
+  full_df_cnt$model_type <- rep(model_type, nrow(full_df_cnt))
+  full_df_cnt$score_threshold <- rep(score_threshold, nrow(full_df_cnt))
+  full_df_cnt$overlap_threshold <- rep(overlap_threshold, nrow(full_df_cnt))
   
   #---- Write Files ----
   
@@ -480,3 +485,4 @@ deploy_model <- function(
     if(prediction_format=="wide"){return(df_out)}
   }
 }
+
