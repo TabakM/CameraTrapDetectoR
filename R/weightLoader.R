@@ -57,7 +57,8 @@ weightLoader <- function(
     model$load_state_dict(state_dict)
   }
   if(model_type == "species"){
-    path2weights <- download_cache(url="https://www.dropbox.com/s/20sd2ikmda2omnd/weights_species_20220308_cpu.pth?raw=1")
+    path2weights <- download_cache(url="https://www.dropbox.com/s/f6i0520ichlk6d7/weights_species_20220126_cpu.pth?raw=1")
+    #path2weights <- download_cache(url="https://www.dropbox.com/s/20sd2ikmda2omnd/weights_species_20220308_cpu.pth?raw=1")
     #path2weights <- "C:/Users/mtabak/projects/aphis_cftep_2021_2022/output/20211228_fasterRCNN_mammalBirdHumanVehicle_16bs_15epochs_9momentum_0005weight_decay_005lr/weights_mammalBirdHumanVehicle_cpu.pth"
     
     # load weights
@@ -66,7 +67,8 @@ weightLoader <- function(
     #dll_path <- download_cache(dll_url)
     #dyn.load(dll_path)
     
-    arch_path <- download_cache(url="https://www.dropbox.com/s/fyamyq463u003ve/fasterrcnnArch_77classes.pt?raw=1")
+    arch_path <- download_cache(url="https://www.dropbox.com/s/jdfjnbfagvn4hfq/fasterrcnnArch_77classes.pt?raw=1")
+    #arch_path <- download_cache(url="https://www.dropbox.com/s/fyamyq463u003ve/fasterrcnnArch_77classes.pt?raw=1")
     #arch_path <- "C:/Users/mtabak/projects/aphis_cftep_2021_2022/fasterrcnn_5classes.pt"
     model <- torch::jit_load(arch_path)
     
