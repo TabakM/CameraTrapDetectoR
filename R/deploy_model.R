@@ -25,12 +25,13 @@
 #'  
 #' 
 #' @param data_dir Absolute path to the folder containing your images
-#' @param recursive boolean. Do you have images in sub-folders within your
+#' @param recursive boolean. Do you have images in subfolders within your
 #'  data_dir that you want to analyze, if so, set to TRUE. If you only want to 
 #'  analyze images within your data_dir and not within sub-folders, set to FALSE.
 #' @param model_type Options are c('general', 'species', 'family', 'pig_only'). 
 #'  The `general` model predicts to the level of mammal, bird, humans, vehicles. 
-#'  The `species` model recognizes 77 species. The `family` model recognizes 33 families.
+#'  The `species` model recognizes 77 species. 
+#'  The `family` model recognizes 33 families.
 #'  The `pig_only` model recognizes only pigs.
 #' @param file_extensions The types of extensions on your image files. Default 
 #'  is c(".jpg", ".JPG")
@@ -88,8 +89,8 @@ deploy_model <- function(
   sample50 = FALSE, 
   write_bbox_csv = FALSE, 
   overlap_correction = TRUE,
-  overlap_threshold = 0.7,
-  score_threshold = 0.5,
+  overlap_threshold = 0.9,
+  score_threshold = 0.6,
   return_data_frame = TRUE,
   prediction_format = "wide",
   h=307,
@@ -122,12 +123,12 @@ deploy_model <- function(
   }
   
   # test overlap_threshold
-  if (overlap_threshold < 0 | overlap_threshold >= 1){
+  if (overlap_threshold < 0 | overlap_threshold > 1){
     stop("overlap_threshold must be between 0 and 1")
   }
   
   # test score_threshold
-  if (score_threshold < 0 | score_threshold >= 1){
+  if (score_threshold < 0 | score_threshold > 1){
     stop("score_threshold must be between 0 and 1")
   }
   
@@ -163,8 +164,10 @@ deploy_model <- function(
                                'encoder' = 0:3)
   }
   if(model_type == "pig_only"){
-    label_encoder = data.frame('label' = c('empty', 'pig'),
-                               'encoder' = 0:1)
+    # AB : fix to overwrite labels from fam model until pig model can be retrained
+    categories <- c('empty', rep('not_pig', 31), 'pig')
+    label_encoder = data.frame('label' = categories,
+                               'encoder' = 0:(length(categories)-1))
   }
   if(model_type == "general"){
     categories <- c('empty', 'mammal', 'bird', 'human', 'vehicle')
@@ -416,13 +419,8 @@ deploy_model <- function(
     full_df_cnt[full_df_cnt$prediction=="empty","count"]<-0
     
     full_df_cnt<-full_df_cnt[order(full_df_cnt$filename,full_df_cnt$prediction),]
-    
   }
   
-  # add model_type, score_threshold, overlap_threshold to long df
-  full_df_cnt$model_type <- rep(model_type, nrow(full_df_cnt))
-  full_df_cnt$score_threshold <- rep(score_threshold, nrow(full_df_cnt))
-  full_df_cnt$overlap_threshold <- rep(overlap_threshold, nrow(full_df_cnt))
   
   #---- Write Files ----
   
@@ -485,4 +483,3 @@ deploy_model <- function(
     if(prediction_format=="wide"){return(df_out)}
   }
 }
-
