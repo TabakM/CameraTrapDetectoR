@@ -10,7 +10,7 @@
 #' @export
 
 
-location.contained.in.extent<-function(location, extent.values){
+location_contained_in_extent<-function(location, extent.values){
   return((location$longitude > extent.values$xmin &
           location$longitude < extent.values$xmax &
           location$latitude > extent.values$ymin &
