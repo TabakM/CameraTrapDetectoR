@@ -9,7 +9,7 @@
 #' @export
 
 
-get.possible.species <- function(location){
+get_possible_species <- function(location){
 
   #--Test which species to consider
   location.test <- vector()
