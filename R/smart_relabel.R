@@ -11,7 +11,7 @@
 #' @export
 
 
-smart.relabel <- function(pred_df, possible.labels){
+smart_relabel <- function(pred_df, possible.labels){
   
   #----Wild_Pig
   
