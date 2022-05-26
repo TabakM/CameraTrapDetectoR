@@ -58,6 +58,7 @@
 #' representing the proportion of bounding box overlap.
 #' @param prediction_format The format to be used for the prediction file.  Accepts
 #' values of 'wide' or 'long'.
+#' @param location the location of the photos provided as longitude, latitude
 #' @param h The image height (in pixels) for the annotated plot. Only used if
 #'  \code{make_plots=TRUE}. 
 #' @param w The image width (in pixels) for the annotated plot.
