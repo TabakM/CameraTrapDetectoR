@@ -93,7 +93,6 @@ deploy_model <- function(
   score_threshold = 0.6,
   return_data_frame = TRUE,
   prediction_format = "wide",
-  location = NULL,
   h=307,
   w=408,
   lty=1,
@@ -225,19 +224,19 @@ deploy_model <- function(
   
   
   #-- Make dataframe of possible labels using species range data
-  if(is.null(location)==FALSE){
+  #if(is.null(location)==FALSE){
     
-    cat(paste0("\nDetermining possible taxa based on location using longitude ",location[1]," latitude ",location[2]))
+  #  cat(paste0("\nDetermining possible taxa based on location using longitude ",location[1]," latitude ",location[2]))
     
     #Load species extent data
-    extent.data <- species_extent_loader()
+  #  extent.data <- species_extent_loader()
     
     #Get possible species
-    location <- data.frame(longitude=location[1], latitude=location[2])
-    possible.labels <- get_possible_species(location)
-    possible.labels <- possible.labels[possible.labels$model_type == model_type,]
+  #  location <- data.frame(longitude=location[1], latitude=location[2])
+  #  possible.labels <- get_possible_species(location)
+  #  possible.labels <- possible.labels[possible.labels$model_type == model_type,]
     
-    cat(paste0("\nIdentified ", nrow(possible.labels), " taxa out of ", nrow(label_encoder), " possible taxa."))
+  #  cat(paste0("\nIdentified ", nrow(possible.labels), " taxa out of ", nrow(label_encoder), " possible taxa."))
   }#END
   
   
@@ -281,10 +280,10 @@ deploy_model <- function(
         pred_df <- decode_output(output, label_encoder, 307, score_threshold)
         
           # evaluate predictions using possible species
-          if(is.null(location)==FALSE){
-            pred_df<-smart_relabel(pred_df, possible.labels)
-            pred_df<-pred_df[pred_df$label.y %in% possible.labels$label,]
-          }
+          #if(is.null(location)==FALSE){
+          #  pred_df<-smart_relabel(pred_df, possible.labels)
+          #  pred_df<-pred_df[pred_df$label.y %in% possible.labels$label,]
+          #}
         
           if(nrow(pred_df)==1){
             pred_df$number_bboxes<-1
