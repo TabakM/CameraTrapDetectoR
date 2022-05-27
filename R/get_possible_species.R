@@ -15,7 +15,7 @@ get_possible_species <- function(location){
   location.test <- vector()
   
   for(i in 1:nrow(extent.data)){
-    location.test[i]<-location.contained.in.extent(location, extent.data[i,])
+    location.test[i]<-location_contained_in_extent(location, extent.data[i,])
   }#END Loop
   
   possible.species <- extent.data[location.test==TRUE,]
