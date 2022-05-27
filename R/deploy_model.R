@@ -234,7 +234,7 @@ deploy_model <- function(
     
     #Get possible species
     location <- data.frame(longitude=location[1], latitude=location[2])
-    possible.labels <- get.possible.species(location)
+    possible.labels <- get_possible_species(location)
     possible.labels <- possible.labels[possible.labels$model_type == model_type,]
     
     cat(paste0("\nIdentified ", nrow(possible.labels), " taxa out of ", nrow(label_encoder), " possible taxa."))
