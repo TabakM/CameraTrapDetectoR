@@ -59,6 +59,7 @@
 #' representing the proportion of bounding box overlap.
 #' @param prediction_format The format to be used for the prediction file.  Accepts
 #' values of 'wide' or 'long'.
+#' @param location the location of the photos provided as longitude, latitude
 #' @param h The image height (in pixels) for the annotated plot. Only used if
 #'  \code{make_plots=TRUE}. 
 #' @param w The image width (in pixels) for the annotated plot.
@@ -225,6 +226,24 @@ deploy_model <- function(
   }
   
   
+  #-- Make dataframe of possible labels using species range data
+  #if(is.null(location)==FALSE){
+    
+  #  cat(paste0("\nDetermining possible taxa based on location using longitude ",location[1]," latitude ",location[2]))
+    
+    #Load species extent data
+  #  extent.data <- species_extent_loader()
+    
+    #Get possible species
+  #  location <- data.frame(longitude=location[1], latitude=location[2])
+  #  possible.labels <- get_possible_species(location)
+  #  possible.labels <- possible.labels[possible.labels$model_type == model_type,]
+    
+  #  cat(paste0("\nIdentified ", nrow(possible.labels), " taxa out of ", nrow(label_encoder), " possible taxa."))
+  }#END
+  
+  
+  
   #-- Make predictions for each image
   
   # empty list to hold predictions from loop
@@ -262,6 +281,12 @@ deploy_model <- function(
         options(warn = defaultW)
         
         pred_df <- decode_output(output, label_encoder, 307, score_threshold)
+        
+          # evaluate predictions using possible species
+          #if(is.null(location)==FALSE){
+          #  pred_df<-smart_relabel(pred_df, possible.labels)
+          #  pred_df<-pred_df[pred_df$label.y %in% possible.labels$label,]
+          #}
         
           if(nrow(pred_df)==1){
             pred_df$number_bboxes<-1
