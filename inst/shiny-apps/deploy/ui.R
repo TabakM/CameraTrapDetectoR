@@ -67,7 +67,7 @@ shinyUI(fluidPage(
 
             ## score_threshold
             shiny::numericInput("score_threshold", "score_threshold", value = 0.6, 
-                                min = 0, max = 1, step = 0.01),
+                                min = 0, max = 0.99, step = 0.01),
             shinyBS::bsTooltip("score_threshold", 
                                "Confidence threshold for using a bounding box. A lower number will produce more bboxes (it will be less stringent in deciding to make a bbox). A higher number will produce fewer bboxes (it will be more stringent).", 
                                placement = "top"),
@@ -79,7 +79,7 @@ shinyUI(fluidPage(
             
             ## overlap_threshold
             shiny::numericInput("overlap_threshold", "overlap_threshold", value = 0.9, 
-                                min = 0, max = 1, step = 0.01),
+                                min = 0, max = 0.99, step = 0.01),
             shinyBS::bsTooltip("overlap_threshold", 
                                "Proportion of bounding box overlap to determine if detections are to be considered a single detection.",
                                placement = "top"),
@@ -147,9 +147,39 @@ shinyUI(fluidPage(
             # console output
             shiny::pre(id = "console"),
             
-            # make rd file as image
+            # Argument descriptions
             shiny::h3("Below are some more details about each of the options on the left:"),
-            shiny::img(src = "manual_image.PNG", align="center")
+            shiny::p(strong("data_dir : "),"	Absolute path to the folder containing your images"),
+            shiny::p(strong("model_type : "),"	Options are 'general', 'species', 'family', 'pig_only'.  
+               The `general` model predicts to the level of mammal, bird, humans, vehicles.  
+               The `species` model recognizes 77 species. 
+               The `family` model recognizes 33 families. 
+               The `pig_only` model recognizes only pigs."),
+            shiny::p(strong("recursive : "),"	 TRUE/FALSE. Do you have images in subfolders within your data_dir that you want to analyze?"),
+            shiny::p(strong("file_extensions : " ),"	Types of images accepted by the model. Select all options represented in your data_dir."),
+            shiny::p(strong("make_plots : "),"	TRUE/FALSE. Do you want to make copies of your images with bounding boxes plotted on them?"),
+            shiny::p(strong("plot_label : "),"  TRUE/FALSE. Do you want plotted bounding boxes to be labeled? The make_plots argument must be set to TRUE."),
+            shiny::p(strong("output_dir : "),"  Absolute path to output. Default is NULL; this creates a folder within your data_dir named after model type,
+               date and time model was initiated."),
+            shiny::p(strong("sample50 : "),"  TRUE/FALSE. Do you want to run the model on a random sample of 50 images from your dataset? 
+               This is a good idea if you are experimenting with settings. Note that a different random sample will generate for each model run."),
+            shiny::p(strong("write_bbox_csv"),"  TRUE/FALSE. Do you want to create a csv with all the information on predicted bounding boxes? 
+               This csv will include all bounding boxes, even those with low probability."),
+            shiny::p(strong("score_threshold : "),"  Confidence threshold for returning a prediction and creating a bounding box. Accepts values from 0-0.99.
+               A lower number will be less stringent, but may make more erroneous predictions. A higher number will be more stringent,
+               but may miss correct predictions with confidence below the chosen threshold."),
+            shiny::p(strong("overlap_correction : "),"  TRUE/FALSE. Should overlapping detections be evaluated for proportion overlap (determined by overlap_threshold)
+               and the highest confidence detection returned?"),
+            shiny::p(strong("overlap_threshold : "),"  Proportion of overlap for two detections to be considered a single detection. Accepts values from 0-0.99."),
+            shiny::p(strong("prediction_format : "),"  Format to be used for model_predictions.csv file; accepts values of 'wide' or 'long'."),
+            shiny::p(strong("h : "),"  Image height (in pixels) for the annotated plot. Only used if make_plots=TRUE."),
+            shiny::p(strong("w : "),"  Image width (in pixels) for the annotated plot. Only used if make_plots=TRUE."),
+            shiny::p(strong("lty : "),"  Line type for bbox plot, applies only if make_plots=TRUE. 
+                     Accepts numeric values 1-6 corresponding to following line types: solid, dashed, dotted, dotdash, longdash, twodash."),
+            shiny::p(strong("lwd : "),"  Line type for bbox plot, applies only if make_plots=TRUE.
+                     Accepts numeric values 1-6 corresponding to increasing line thickness."),
+            shiny::p(strong("col : "),"  Line color for bbox plot. Accepts the following values: white, grey, black, red, yellow, 
+                                     green, blue, orange, purple")
         )
     )
 ))
