@@ -94,6 +94,12 @@ shinyUI(fluidPage(
             shinyBS::bsTooltip("prediction_format", "What format do you want used for your prediction file?",
                                placement = "top"),
             
+            ## location
+            shiny::numericInput("latitude", "latitude", value = NULL),
+            shinyBS::bsTooltip("latitude", "The image location latitude"),
+            shiny::numericInput("longitude", "longitude", value = NULL),
+            shinyBS::bsTooltip("longitude", "The image location longitude"),
+            
             ## h
             shiny::numericInput("h", "h", value = 307),
             shinyBS::bsTooltip("h", "The image height (in pixels) for the annotated plot"),
@@ -172,6 +178,8 @@ shinyUI(fluidPage(
                and the highest confidence detection returned?"),
             shiny::p(strong("overlap_threshold : "),"  Proportion of overlap for two detections to be considered a single detection. Accepts values from 0-0.99."),
             shiny::p(strong("prediction_format : "),"  Format to be used for model_predictions.csv file; accepts values of 'wide' or 'long'."),
+            shiny::p(strong("latitude and longitude : "),"  Optional image location to filter model predictions to extant species. Input takes one location per model run;
+                     if images originate from multiple locations, separate them into different model runs based on location."),
             shiny::p(strong("h : "),"  Image height (in pixels) for the annotated plot. Only used if make_plots=TRUE."),
             shiny::p(strong("w : "),"  Image width (in pixels) for the annotated plot. Only used if make_plots=TRUE."),
             shiny::p(strong("lty : "),"  Line type for bbox plot, applies only if make_plots=TRUE. 
