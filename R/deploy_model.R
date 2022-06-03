@@ -30,7 +30,8 @@
 #'  analyze images within your data_dir and not within sub-folders, set to FALSE.
 #' @param model_type Options are c('general', 'species', 'family', 'pig_only'). 
 #'  The `general` model predicts to the level of mammal, bird, humans, vehicles. 
-#'  The `species` model recognizes 77 species. The `family` model recognizes 33 families.
+#'  The `species` model recognizes 77 species. 
+#'  The `family` model recognizes 33 families.
 #'  The `pig_only` model recognizes only pigs.
 #' @param file_extensions The types of extensions on your image files. Default 
 #'  is c(".jpg", ".JPG")
@@ -58,13 +59,14 @@
 #' representing the proportion of bounding box overlap.
 #' @param prediction_format The format to be used for the prediction file.  Accepts
 #' values of 'wide' or 'long'.
+#' @param latitude image location latitude. Use only if all images in the model run come from the same location.
+#' @param longitude image location longitude. Use only if all images in the model run come from the same location.
 #' @param h The image height (in pixels) for the annotated plot. Only used if
 #'  \code{make_plots=TRUE}. 
 #' @param w The image width (in pixels) for the annotated plot.
 #' @param lty line type for bbox plot. See \code{?plot} for details
 #' @param lwd line width for bbox plot. See \code{?plot} for details
 #' @param col line color for bbox plot. See \code{?plot} for details
-#' @param labeled This is not functional
 #' @param return_data_frame boolean. Do you want a dataframe returned
 #' @return Returns a dataframe of predictions for each file. The rows in this 
 #'  dataframe are the file names in your `data_dir`; the columns are the categories
@@ -92,12 +94,13 @@ deploy_model <- function(
   score_threshold = 0.6,
   return_data_frame = TRUE,
   prediction_format = "wide",
+  latitude = NULL,
+  longitude = NULL,
   h=307,
   w=408,
   lty=1,
   lwd=2, 
-  col='red',
-  labeled = FALSE
+  col='red'
 ){
   
   #-- Load operators
@@ -122,12 +125,12 @@ deploy_model <- function(
   }
   
   # test overlap_threshold
-  if (overlap_threshold < 0 | overlap_threshold > 1){
+  if (overlap_threshold < 0 | overlap_threshold >= 1){
     stop("overlap_threshold must be between 0 and 1")
   }
   
   # test score_threshold
-  if (score_threshold < 0 | score_threshold > 1){
+  if (score_threshold < 0 | score_threshold >= 1){
     stop("score_threshold must be between 0 and 1")
   }
   
@@ -136,6 +139,14 @@ deploy_model <- function(
   if(!prediction_format %in% formats) {
     stop(paste0("prediction_format must be one of the available options: ",
                 list(formats)))
+  }
+  
+  # check location arguments
+  if (latitude < -90 | latitude > 90){
+    stop("latitude must be between -90 and 90")
+  }
+  if (longitude < -180 | latitude > 180){
+    stop("longitude must be between -180 and 180")
   }
   
   # test lty 
@@ -163,8 +174,10 @@ deploy_model <- function(
                                'encoder' = 0:3)
   }
   if(model_type == "pig_only"){
-    label_encoder = data.frame('label' = c('empty', 'pig'),
-                               'encoder' = 0:1)
+    # AB : fix to overwrite labels from fam model until pig model can be retrained
+    categories <- c('empty', rep('not_pig', 31), 'pig')
+    label_encoder = data.frame('label' = categories,
+                               'encoder' = 0:(length(categories)-1))
   }
   if(model_type == "general"){
     categories <- c('empty', 'mammal', 'bird', 'human', 'vehicle')
@@ -222,6 +235,23 @@ deploy_model <- function(
   }
   
   
+  #-- Make dataframe of possible labels using species range data
+  location <- data.frame(longitude=longitude, latitude=latitude)
+  if(is.null(location) == FALSE){
+    cat(paste0("\nDetermining possible taxa based on location using latitude ",latitude," longitude ",longitude))
+    
+    #Load species extent data
+    extent.data <- species_extent_loader()
+    
+    #Get possible species
+    possible.labels <- get_possible_species(location, extent.data)
+    possible.labels <- possible.labels[possible.labels$model_type == model_type,]
+    
+    cat(paste0("\nIdentified ", nrow(possible.labels), " taxa out of ", nrow(label_encoder), " possible taxa."))
+  }#END
+  
+  
+  
   #-- Make predictions for each image
   
   # empty list to hold predictions from loop
@@ -259,6 +289,12 @@ deploy_model <- function(
         options(warn = defaultW)
         
         pred_df <- decode_output(output, label_encoder, 307, score_threshold)
+        
+          # evaluate predictions using possible species
+          if(is.null(location)==FALSE){
+            pred_df<-smart_relabel(pred_df, possible.labels, label_encoder)
+            pred_df<-pred_df[pred_df$label.y %in% possible.labels$label,]
+          }
         
           if(nrow(pred_df)==1){
             pred_df$number_bboxes<-1
@@ -462,6 +498,8 @@ deploy_model <- function(
     overlap_threshold = overlap_threshold,
     score_threshold = score_threshold,
     prediction_format = prediction_format,
+    latitude = latitude,
+    longitude = longitude,
     h=h,
     w=w,
     lty=lty,
