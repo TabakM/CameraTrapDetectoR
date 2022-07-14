@@ -6,12 +6,13 @@
 #' 
 #' @param pred_df dataframe containing predictions for image
 #' @param possible.labels dataframe containing possible labels based on species occurrence
+#' @param label_encoder label dictionary for model being run
 #' @return
 #' 
 #' @export
 
 
-smart_relabel <- function(pred_df, possible.labels){
+smart_relabel <- function(pred_df, possible.labels, label_encoder){
   
   #----Wild_Pig
   

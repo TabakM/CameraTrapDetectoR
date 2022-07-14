@@ -99,6 +99,8 @@ shinyServer(function(input, output) {
                    "overlap_threshold = ", input$overlap_threshold, ", ",
                    "return_data_frame = ", input$return_data_frame, ", ",
                    "prediction_format = ", input$prediction_format, ", ",
+                   "latitude = ", input$latitude, ", ",
+                   "longitude = ", input$longitude, ", ",
                    "h = ", input$h, ", ",
                    "w = ", input$w, ", ",
                    "lty = ", input$lty, ", ",
@@ -138,7 +140,7 @@ shinyServer(function(input, output) {
             # NOTE: it will only close after the model is finished running
             shiny::showModal(
                 shiny::modalDialog(
-                    shiny::h4("Running model. This will take a few minutes. If this is your first time using this package or you are using a different model, we must download some files first.", align = "center"),
+                    shiny::h4("Running model. This will take a few minutes. If this is your first time using this package or you are using a different model, we must download some files first. You may need to disconnect from VPN to allow these files to download.", align = "center"),
                     
                     # include loading spinner
                     shiny::HTML('<center><img src="spinner.gif"></center>'),
@@ -169,6 +171,8 @@ shinyServer(function(input, output) {
                                              overlap_threshold = input$overlap_threshold,
                                              return_data_frame = as.logical(input$return_data_frame),
                                              prediction_format = input$prediction_format,
+                                             latitude = input$latitude,
+                                             longitude = input$longitude,
                                              h = input$h, 
                                              w = input$w, 
                                              lty = input$lty, 

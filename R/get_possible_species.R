@@ -4,12 +4,13 @@
 #' extent data for species included in the trained models and will return a list of possible species.
 #' 
 #' @param location dataframe containing a single longitude and latitude value
+#' @param extent.data auxiliary location database
 #' @return
 #' 
 #' @export
 
 
-get_possible_species <- function(location){
+get_possible_species <- function(location, extent.data){
 
   #--Test which species to consider
   location.test <- vector()
