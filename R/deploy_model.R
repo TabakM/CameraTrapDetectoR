@@ -148,6 +148,9 @@ deploy_model <- function(
   if (longitude < -180 | latitude > 180){
     stop("longitude must be between -180 and 180")
   }
+  if ((is.null(longitude) == TRUE & is.null(latitude) == FALSE) | (is.null(longitude) == FALSE & is.null(latitude) == TRUE)){
+    stop("invalid location; please include both latitude and longitude or leave both as NULL")
+  }
   
   # test lty 
   lty_options <- 1:6
