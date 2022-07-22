@@ -59,8 +59,9 @@
 #' representing the proportion of bounding box overlap.
 #' @param prediction_format The format to be used for the prediction file.  Accepts
 #' values of 'wide' or 'long'.
-#' @param latitude image location latitude. Use only if all images in the model run come from the same location.
-#' @param longitude image location longitude. Use only if all images in the model run come from the same location.
+#' @param location boolean. Filter model classes by physical range. Use only if all images in the model run come from the same location.
+#' @param latitude image location latitude. Takes values between -90 and 90
+#' @param longitude image location longitude. Takes values between -180 and 180
 #' @param h The image height (in pixels) for the annotated plot. Only used if
 #'  \code{make_plots=TRUE}. 
 #' @param w The image width (in pixels) for the annotated plot.
@@ -94,6 +95,7 @@ deploy_model <- function(
   score_threshold = 0.6,
   return_data_frame = TRUE,
   prediction_format = "wide",
+  location=FALSE,
   latitude = NULL,
   longitude = NULL,
   h=307,
@@ -142,14 +144,18 @@ deploy_model <- function(
   }
   
   # check location arguments
-  if (latitude < -90 | latitude > 90){
-    stop("latitude must be between -90 and 90")
-  }
-  if (longitude < -180 | latitude > 180){
-    stop("longitude must be between -180 and 180")
-  }
   if ((is.null(longitude) == TRUE & is.null(latitude) == FALSE) | (is.null(longitude) == FALSE & is.null(latitude) == TRUE)){
     stop("invalid location; please include both latitude and longitude or leave both as NULL")
+  }
+  if (location==TRUE){
+    if (latitude < -90 | latitude > 90){
+      stop("latitude value must be between -90 and 90")
+    }
+  }
+  if (location==TRUE){
+    if (latitude < -180 | latitude > 180){
+      stop("longitude value must be between -180 and 180")
+    }
   }
   
   # test lty 
@@ -239,20 +245,19 @@ deploy_model <- function(
   
   
   #-- Make dataframe of possible labels using species range data
-  location <- data.frame(longitude=longitude, latitude=latitude)
-  if(is.null(location) == FALSE){
+  if (location == TRUE){
     cat(paste0("\nDetermining possible taxa based on location using latitude ",latitude," longitude ",longitude))
     
     #Load species extent data
     extent.data <- species_extent_loader()
     
     #Get possible species
-    possible.labels <- get_possible_species(location, extent.data)
+    possible.labels <- get_possible_species(data.frame(longitude=longitude, latitude=latitude), extent.data)
     possible.labels <- possible.labels[possible.labels$model_type == model_type,]
     
     cat(paste0("\nIdentified ", nrow(possible.labels), " taxa out of ", nrow(label_encoder), " possible taxa."))
   }#END
-  
+
   
   
   #-- Make predictions for each image
@@ -294,7 +299,7 @@ deploy_model <- function(
         pred_df <- decode_output(output, label_encoder, 307, score_threshold)
         
           # evaluate predictions using possible species
-          if(is.null(location)==FALSE){
+          if(location==TRUE){
             pred_df<-smart_relabel(pred_df, possible.labels, label_encoder)
             pred_df<-pred_df[pred_df$label.y %in% possible.labels$label,]
           }
