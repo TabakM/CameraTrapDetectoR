@@ -24,7 +24,10 @@ weightLoader <- function(
   
   # based on model type, get path 2 weights and number of classes
   if(model_type == 'pig_only'){
-    path2weights <- download_cache(url="https://www.dropbox.com/s/pv76miytqc7lp00/weights_pig_only_20220309_cpu.pth?raw=1")
+    #path2weights <- download_cache(url="https://www.dropbox.com/s/pv76miytqc7lp00/weights_pig_only_20220309_cpu.pth?raw=1")
+    
+    # AB : use relabeled family weights until we can retrain pig-only model
+    path2weights <- download_cache(url="https://www.dropbox.com/s/9u4isbz0fv4gwda/weights_family_20220308_cpu.pth?raw=1")
     
     # load weights
     state_dict <- torch::load_state_dict(path2weights)
@@ -35,7 +38,11 @@ weightLoader <- function(
     #model <- torch::jit_load("fasterrcnn_4classes.pt")
     # model <- torch::jit_load(system.file("lib/fasterrcnn_4classes.pt", 
     #                                      package="CameraTrapDetectoR"))
-    arch_path <- download_cache(url="https://www.dropbox.com/s/68xvf4mgwpij2tv/fasterrcnnArch_2classes.pt?raw=1")
+    
+    # AB : use family classifications until pig model can be retrained
+    #arch_path <- download_cache(url="https://www.dropbox.com/s/68xvf4mgwpij2tv/fasterrcnnArch_2classes.pt?raw=1")
+    arch_path <- download_cache(url="https://www.dropbox.com/s/obqc1ffmnq1hprq/fasterrcnnArch_33classes.pt?raw=1")
+    
     model <- torch::jit_load(arch_path)
     #model <- torch::jit_load("mammalBirdVehicle.pt")
     model$load_state_dict(state_dict)

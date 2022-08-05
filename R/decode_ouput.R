@@ -20,6 +20,7 @@ decode_output <- function(
   preds <- output[[2]][[1]]
   boxes <- as.matrix(preds$boxes)
   img_labels <- as.matrix(preds$labels)
+  
   scores <- as.matrix(preds$scores)
 
   pred_df <- data.frame('boxes' = boxes,
@@ -45,9 +46,8 @@ decode_output <- function(
   # plots are made in R, so I need to inverse this value
   pred_df$YMin <- h-pred_df$YMin
   pred_df$YMax <- h-pred_df$YMax
-
+  
   # get name of label
   pred_df <- merge(pred_df, label_encoder, by.x="label", by.y="encoder")
-  
   return(pred_df)
 }
