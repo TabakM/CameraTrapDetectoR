@@ -1,5 +1,7 @@
 ﻿# CameraTrapDetectoR: Detect, classify, and count animals in camera trap images
 
+> **See also** [WildObserve](https://www.qsc.earth/WildObserve/) is a desktop app for Mac, Windows, and Linux that finds animals in camera-trap images, suggests species, learns your project's species as you review, and estimates occupancy and abundance, with your images staying on your computer.
+
 ## Step 1: Install Microsoft Visual C++ and update R, if applicable
 Note: Microsoft Visual C++ step may no longer be necessary, <b>and it is only necessary on Windows Computers</b>. If you are willing to risk it, try skipping this step and reporting to us if you get unexpected errors when running `deploy_model` in step 4. \
 \
